@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Задание 1 - Веб-технологии</title>
+    <title>Задание 1 </title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,34 +82,11 @@
     </style>
 </head>
 <body>
-    <h1>Задание 1: Работа с веб-технологиями</h1>
-    
-    <div class="info-box">
-        <strong>Выполнил:</strong> [Ваше ФИО]<br>
-        <strong>Группа:</strong> [Ваша группа]<br>
-        <strong>Логин на сервере:</strong> [Ваш логин, например u82382]
-    </div>
-    
-    <div class="task-list">
-        <h3>Выполненные задачи:</h3>
-        <ol>
-            <li>Подключение к учебному серверу kubsu-dev.ru по SSH</li>
-            <li>Определение IP-адреса веб-сервера kubsu.ru командой ping</li>
-            <li>Определение A-записей доменов kubsu.ru и kubsu-dev.ru</li>
-            <li>Получение информации WHOIS о дате регистрации доменов</li>
-            <li>Создание веб-страницы со скриншотами</li>
-        </ol>
-    </div>
-    
+    <h1>Задание 1: Работа с веб-технологиями</h1>  
     <!-- Задание 2: Ping -->
     <h2>1. Определение IP-адреса kubsu.ru командой ping</h2>
     <div class="screenshot">
         <img src="screenshots/ping-kubsu.jpg" alt="Результат команды ping kubsu.ru">
-        <div class="caption">
-            <strong>Рис. 1:</strong> Результат выполнения команды <code>ping kubsu.ru</code><br>
-            <strong>IP-адрес:</strong> 185.13.84.92<br>
-            <strong>Вывод:</strong> Получено 24 пакета, потери 0%
-        </div>
     </div>
     
     <!-- Задание 3: nslookup -->
@@ -118,16 +95,6 @@
     <h3>2.1 A-записи (IP-адреса)</h3>
     <div class="screenshot">
         <img src="screenshots/nslookup-a-both.jpg" alt="A-записи kubsu.ru и kubsu-dev.ru">
-        <div class="caption">
-            <strong>Рис. 2:</strong> Результат выполнения команд <code>nslookup kubsu.ru</code> и <code>nslookup kubsu-dev.ru</code><br>
-            <strong>kubsu.ru:</strong> 185.13.84.92<br>
-            <strong>kubsu-dev.ru:</strong> 212.192.134.135
-        </div>
-    </div>
-    
-    <div class="info-box">
-        <strong>Примечание:</strong> На скриншоте также отображена информация о пакетах ping, 
-        что подтверждает правильность IP-адреса kubsu.ru.
     </div>
     
     <!-- Задание 4: whois -->
@@ -136,65 +103,18 @@
     <h3>3.1 Домен kubsu.ru</h3>
     <div class="screenshot">
         <img src="screenshots/whois-kubsu.jpg" alt="Информация WHOIS для kubsu.ru">
-        <div class="caption">
-            <strong>Рис. 3:</strong> Результат выполнения команды <code>whois kubsu.ru</code><br>
-            <strong>Владелец:</strong> Kuban State University<br>
-            <strong>Дата регистрации:</strong> 1998-03-28T12:18:30Z (28 марта 1998 года)<br>
-            <strong>Серверы DNS:</strong> dns1.kubsu.ru (212.192.128.8), dns2.kubsu.ru (212.192.138.8)
-        </div>
     </div>
     
     <h3>3.2 Домен kubsu-dev.ru</h3>
     <div class="screenshot">
         <img src="screenshots/whois-kubsu-dev.jpg" alt="Информация WHOIS для kubsu-dev.ru">
-        <div class="caption">
-            <strong>Рис. 4:</strong> Результат выполнения команды <code>whois kubsu-dev.ru</code><br>
-            <strong>Владелец:</strong> Private Person<br>
-            <strong>Дата регистрации:</strong> 2020-02-12T15:55:06Z (12 февраля 2020 года)<br>
-            <strong>Серверы DNS:</strong> ns1.nameself.com, ns2.nameself.com
-        </div>
     </div>
     
-    <div class="info-box">
-        <strong>Анализ:</strong> Домен kubsu.ru зарегистрирован значительно раньше (1998 год) 
-        и принадлежит университету, в то время как kubsu-dev.ru зарегистрирован в 2020 году 
-        частным лицом.
-    </div>
+ 
+   
     
-    <!-- Задание 5-6: Дополнительная информация -->
-    <h2>4. Дополнительная информация</h2>
     
-    <div class="screenshot">
-        <h3>Структура проекта</h3>
-        <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto;">
-zadanie1/
-│
-├── index.html              # Эта веб-страница
-│
-├── screenshots/            # Папка со скриншотами
-│   ├── ping-kubsu.jpg
-│   ├── nslookup-a-both.jpg
-│   ├── whois-kubsu.jpg
-│   └── whois-kubsu-dev.jpg
-│
-└── README.md               # Описание проекта (опционально)
-        </pre>
-        
-        <h3>Использованные команды</h3>
-        <ul>
-            <li><code>ssh [логин]@kubsu-dev.ru</code> - подключение к серверу</li>
-            <li><code>ping kubsu.ru</code> - проверка доступности и определение IP</li>
-            <li><code>nslookup kubsu.ru</code> - получение A-записей</li>
-            <li><code>nslookup -type=MX kubsu.ru</code> - получение MX-записей (если нужно)</li>
-            <li><code>whois kubsu.ru</code> - информация о домене</li>
-            <li><code>git clone [репозиторий]</code> - клонирование на сервер</li>
-        </ul>
-    </div>
     
-    <footer>
-        <p>Кубанский государственный университет | Веб-технологии</p>
-        <p>Страница доступна по адресу: http://[ваш_логин].kubsu-dev.ru/zadanie1/</p>
-        <p>© 2025</p>
-    </footer>
+    
 </body>
 </html>
