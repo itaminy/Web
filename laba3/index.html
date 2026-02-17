@@ -1,1 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Анкета</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<form action="submit.php" method="post" class="form">
+    <h2>Анкета</h2>
+
+    <label>ФИО</label>
+    <input type="text" name="fio" required>
+
+    <label>Телефон</label>
+    <input type="tel" name="phone" required>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>Дата рождения</label>
+    <input type="date" name="birthdate" required>
+
+    <label>Пол</label>
+    <div class="radio">
+        <input type="radio" name="gender" value="male" required> Мужской
+        <input type="radio" name="gender" value="female"> Женский
+    </div>
+
+    <label>Любимые языки</label>
+    <select name="languages[]" multiple required>
+        <option>Pascal</option>
+        <option>C</option>
+        <option>C++</option>
+        <option>JavaScript</option>
+        <option>PHP</option>
+        <option>Python</option>
+        <option>Haskell</option>
+        <option>Clojure</option>
+        <option>Prolog</option>
+        <option>Scala</option>
+        <option>Go</option>
+    </select>
+
+    <label>Биография</label>
+    <textarea name="bio"></textarea>
+
+    <label>
+        <input type="checkbox" name="contract" required>
+        С контрактом ознакомлен(а)
+    </label>
+
+    <button type="submit">Сохранить</button>
+</form>
+
+</body>
+</html>
