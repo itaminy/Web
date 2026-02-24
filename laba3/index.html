@@ -28,6 +28,7 @@
         ?>
 
         <form action="save_form.php" method="POST">
+            <!-- ФИО -->
             <div class="form-group">
                 <label for="full_name">👤 ФИО:</label>
                 <input type="text" id="full_name" name="full_name" 
@@ -36,6 +37,7 @@
                        maxlength="150" required>
             </div>
 
+            <!-- Телефон -->
             <div class="form-group">
                 <label for="phone">📞 Телефон:</label>
                 <input type="tel" id="phone" name="phone" 
@@ -44,6 +46,7 @@
                        required>
             </div>
 
+            <!-- Email -->
             <div class="form-group">
                 <label for="email">✉️ Email:</label>
                 <input type="email" id="email" name="email" 
@@ -52,6 +55,7 @@
                        required>
             </div>
 
+            <!-- Дата рождения -->
             <div class="form-group">
                 <label for="birth_date">🎂 Дата рождения:</label>
                 <input type="date" id="birth_date" name="birth_date" 
@@ -59,6 +63,7 @@
                        required>
             </div>
 
+            <!-- Пол -->
             <div class="form-group">
                 <label>⚥ Пол:</label>
                 <div class="radio-group">
@@ -80,6 +85,7 @@
                 </div>
             </div>
 
+            <!-- Языки программирования -->
             <div class="form-group">
                 <label for="languages">💻 Любимые языки программирования:</label>
                 <select id="languages" name="languages[]" multiple required>
@@ -97,11 +103,13 @@
                 <small>Удерживайте Ctrl (Cmd на Mac) для выбора нескольких языков</small>
             </div>
 
+            <!-- Биография -->
             <div class="form-group">
                 <label for="biography">📖 Биография:</label>
                 <textarea id="biography" name="biography" placeholder="Расскажите о себе..."><?php echo isset($_SESSION['form_data']['biography']) ? htmlspecialchars($_SESSION['form_data']['biography']) : ''; ?></textarea>
             </div>
 
+            <!-- Чекбокс с контрактом -->
             <div class="form-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="contract" name="contract_accepted" value="1" 
@@ -110,6 +118,7 @@
                 </div>
             </div>
 
+            <!-- Кнопка сохранения -->
             <button type="submit" class="btn-submit">💾 Сохранить</button>
         </form>
     </div>
