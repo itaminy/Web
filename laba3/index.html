@@ -2,57 +2,122 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Анкета</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета пользователя</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>📝 Анкета пользователя</h1>
+        
+        <?php
+        session_start();
+        if (isset($_SESSION['form_errors'])) {
+            echo '<div class="error-message"><strong>Ошибки заполнения:</strong><ul>';
+            foreach ($_SESSION['form_errors'] as $error) {
+                echo '<li>' . htmlspecialchars($error) . '</li>';
+            }
+            echo '</ul></div>';
+            unset($_SESSION['form_errors']);
+        }
+        
+        if (isset($_SESSION['form_success'])) {
+            echo '<div class="success-message">' . htmlspecialchars($_SESSION['form_success']) . '</div>';
+            unset($_SESSION['form_success']);
+        }
+        ?>
 
-<form action="submit.php" method="post" class="form">
-    <h2>Анкета</h2>
+        <form action="save_form.php" method="POST">
+            <div class="form-group">
+                <label for="full_name">👤 ФИО:</label>
+                <input type="text" id="full_name" name="full_name" 
+                       placeholder="Иванов Иван Иванович" 
+                       value="<?php echo isset($_SESSION['form_data']['full_name']) ? htmlspecialchars($_SESSION['form_data']['full_name']) : ''; ?>"
+                       maxlength="150" required>
+            </div>
 
-    <label>ФИО</label>
-    <input type="text" name="fio" required>
+            <div class="form-group">
+                <label for="phone">📞 Телефон:</label>
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="+7 (999) 123-45-67"
+                       value="<?php echo isset($_SESSION['form_data']['phone']) ? htmlspecialchars($_SESSION['form_data']['phone']) : ''; ?>"
+                       required>
+            </div>
 
-    <label>Телефон</label>
-    <input type="tel" name="phone" required>
+            <div class="form-group">
+                <label for="email">✉️ Email:</label>
+                <input type="email" id="email" name="email" 
+                       placeholder="example@mail.com"
+                       value="<?php echo isset($_SESSION['form_data']['email']) ? htmlspecialchars($_SESSION['form_data']['email']) : ''; ?>"
+                       required>
+            </div>
 
-    <label>Email</label>
-    <input type="email" name="email" required>
+            <div class="form-group">
+                <label for="birth_date">🎂 Дата рождения:</label>
+                <input type="date" id="birth_date" name="birth_date" 
+                       value="<?php echo isset($_SESSION['form_data']['birth_date']) ? htmlspecialchars($_SESSION['form_data']['birth_date']) : ''; ?>"
+                       required>
+            </div>
 
-    <label>Дата рождения</label>
-    <input type="date" name="birthdate" required>
+            <div class="form-group">
+                <label>⚥ Пол:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="male" name="gender" value="male" 
+                            <?php echo (isset($_SESSION['form_data']['gender']) && $_SESSION['form_data']['gender'] == 'male') ? 'checked' : ''; ?> required>
+                        <label for="male">Мужской</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="female" name="gender" value="female"
+                            <?php echo (isset($_SESSION['form_data']['gender']) && $_SESSION['form_data']['gender'] == 'female') ? 'checked' : ''; ?>>
+                        <label for="female">Женский</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="other" name="gender" value="other"
+                            <?php echo (isset($_SESSION['form_data']['gender']) && $_SESSION['form_data']['gender'] == 'other') ? 'checked' : ''; ?>>
+                        <label for="other">Другой</label>
+                    </div>
+                </div>
+            </div>
 
-    <label>Пол</label>
-    <div class="radio">
-        <input type="radio" name="gender" value="male" required> Мужской
-        <input type="radio" name="gender" value="female"> Женский
+            <div class="form-group">
+                <label for="languages">💻 Любимые языки программирования:</label>
+                <select id="languages" name="languages[]" multiple required>
+                    <?php
+                    $languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
+                                 'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
+                    $selected_langs = isset($_SESSION['form_data']['languages']) ? $_SESSION['form_data']['languages'] : [];
+                    
+                    foreach ($languages as $lang) {
+                        $selected = in_array($lang, $selected_langs) ? 'selected' : '';
+                        echo "<option value=\"$lang\" $selected>$lang</option>";
+                    }
+                    ?>
+                </select>
+                <small>Удерживайте Ctrl (Cmd на Mac) для выбора нескольких языков</small>
+            </div>
+
+            <div class="form-group">
+                <label for="biography">📖 Биография:</label>
+                <textarea id="biography" name="biography" placeholder="Расскажите о себе..."><?php echo isset($_SESSION['form_data']['biography']) ? htmlspecialchars($_SESSION['form_data']['biography']) : ''; ?></textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="contract" name="contract_accepted" value="1" 
+                        <?php echo (isset($_SESSION['form_data']['contract_accepted']) && $_SESSION['form_data']['contract_accepted'] == '1') ? 'checked' : ''; ?> required>
+                    <label for="contract">Я ознакомлен(а) с условиями контракта</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">💾 Сохранить</button>
+        </form>
     </div>
-
-    <label>Любимые языки</label>
-    <select name="languages[]" multiple required>
-        <option>Pascal</option>
-        <option>C</option>
-        <option>C++</option>
-        <option>JavaScript</option>
-        <option>PHP</option>
-        <option>Python</option>
-        <option>Haskell</option>
-        <option>Clojure</option>
-        <option>Prolog</option>
-        <option>Scala</option>
-        <option>Go</option>
-    </select>
-
-    <label>Биография</label>
-    <textarea name="bio"></textarea>
-
-    <label>
-        <input type="checkbox" name="contract" required>
-        С контрактом ознакомлен(а)
-    </label>
-
-    <button type="submit">Сохранить</button>
-</form>
-
+    
+    <?php
+    if (isset($_SESSION['form_data'])) {
+        unset($_SESSION['form_data']);
+    }
+    ?>
 </body>
 </html>
