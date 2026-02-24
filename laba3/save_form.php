@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-// Параметры подключения к БД (ваши текущие настройки)
+// Параметры подключения к БД
 $host = 'localhost';
 $dbname = 'u82382'; // Имя вашей базы данных
 $username = 'u82382'; // Ваше имя пользователя
-$password = 'Drt#dSRER'; // Ваш пароль (нужно ввести)
+$password = 'Drt#dSRER'; // ВАЖНО: введите ваш пароль от БД
 
 // Массив для ошибок
 $errors = [];
@@ -19,7 +19,7 @@ $allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
 $allowed_genders = ['male', 'female', 'other'];
 
 try {
-    // Подключение к БД (используем вашу существующую базу u82382)
+    // Подключение к БД
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
@@ -149,9 +149,6 @@ try {
     if (isset($pdo)) {
         $pdo->rollBack();
     }
-    
-    // Логируем ошибку
-    error_log('Database error: ' . $e->getMessage());
     
     // Сохраняем сообщение об ошибке
     $_SESSION['form_errors'] = ['Произошла ошибка при сохранении данных: ' . $e->getMessage()];
