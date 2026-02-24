@@ -5,7 +5,7 @@ session_start();
 $host = 'localhost';
 $dbname = 'u82382'; // Имя вашей базы данных
 $username = 'u82382'; // Ваше имя пользователя
-$password = 'Drt#dSRER'; // ВАЖНО: введите ваш пароль от БД
+$password = 'Drt#dSRER'; 
 
 // Массив для ошибок
 $errors = [];
