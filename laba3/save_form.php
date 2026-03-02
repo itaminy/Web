@@ -141,8 +141,8 @@ try {
     $_SESSION['form_success'] = 'Данные успешно сохранены! ID записи: ' . $user_id;
     
     // Перенаправляем обратно к форме
-    header('Location: index.html');
-    exit();
+    //header('Location: index.html');
+    //exit();
     
 } catch (PDOException $e) {
     // Откатываем транзакцию в случае ошибки
