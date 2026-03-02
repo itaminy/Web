@@ -40,6 +40,14 @@ if (isset($_COOKIE['form_old'])) {
     <div class="container">
         <h1>📝 Анкета пользователя</h1>
         
+        <?php
+        // Отображаем сообщение об успехе, если оно есть в сессии
+        if (isset($_SESSION['success'])) {
+            echo '<div class="success-message">' . $_SESSION['success'] . '</div>';
+            unset($_SESSION['success']);
+        }
+        ?>
+        
         <?php if (!empty($errors)): ?>
             <div class="error-message">
                 <strong>Пожалуйста, исправьте ошибки:</strong>
