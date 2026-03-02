@@ -1,11 +1,20 @@
 <?php
 session_start();
 
-// Параметры подключения к БД
-$host = 'localhost';
-$dbname = 'u82382'; // Имя вашей базы данных
-$username = 'u82382'; // Ваше имя пользователя
-$password = 'Drt#dSRER'; 
+$config_file = '/home/u82382/config/laba3/db_config.php';
+
+if (!file_exists($config_file)) {
+    error_log("Config file not found: $config_file");
+    die('Ошибка конфигурации сервера');
+}
+
+require_once $config_file;
+
+// Используем константы из конфига
+$host = DB_HOST;
+$dbname = DB_NAME;
+$username = DB_USER;
+$password = DB_PASS;
 
 // Массив для ошибок
 $errors = [];
