@@ -1,0 +1,178 @@
+<?php
+session_start();
+
+// Подключаем конфигурацию БД
+$config_file = '/home/u82382/config/laba3/db_config.php';
+if (file_exists($config_file)) {
+    require_once $config_file;
+}
+
+// Массив для ошибок
+$errors = [];
+
+// Регулярные выражения для валидации
+$patterns = [
+    'full_name' => '/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+    'phone' => '/^[\+\d\s\(\)\-]{10,20}$/',
+    'email' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+    'birth_date' => '/^\d{4}-\d{2}-\d{2}$/',
+    'gender' => '/^(male|female|other)$/'
+];
+
+// Сообщения об ошибках
+$messages = [
+    'full_name' => 'ФИО должно содержать только буквы, пробелы и дефисы',
+    'phone' => 'Телефон может содержать только цифры, пробелы, +, -, (, )',
+    'email' => 'Введите корректный email (например: name@domain.com)',
+    'birth_date' => 'Дата должна быть в формате ГГГГ-ММ-ДД',
+    'gender' => 'Выберите допустимое значение пола',
+    'languages' => 'Выберите хотя бы один язык программирования из списка',
+    'contract' => 'Необходимо подтвердить ознакомление с контрактом'
+];
+
+// Валидация ФИО
+if (empty($_POST['full_name'])) {
+    $errors['full_name'] = 'Поле ФИО обязательно для заполнения';
+} elseif (!preg_match($patterns['full_name'], $_POST['full_name'])) {
+    $errors['full_name'] = $messages['full_name'];
+} elseif (strlen($_POST['full_name']) > 150) {
+    $errors['full_name'] = 'ФИО не должно превышать 150 символов';
+}
+
+// Валидация телефона
+if (empty($_POST['phone'])) {
+    $errors['phone'] = 'Поле Телефон обязательно для заполнения';
+} elseif (!preg_match($patterns['phone'], $_POST['phone'])) {
+    $errors['phone'] = $messages['phone'];
+}
+
+// Валидация email
+if (empty($_POST['email'])) {
+    $errors['email'] = 'Поле Email обязательно для заполнения';
+} elseif (!preg_match($patterns['email'], $_POST['email'])) {
+    $errors['email'] = $messages['email'];
+}
+
+// Валидация даты рождения
+if (empty($_POST['birth_date'])) {
+    $errors['birth_date'] = 'Поле Дата рождения обязательно для заполнения';
+} elseif (!preg_match($patterns['birth_date'], $_POST['birth_date'])) {
+    $errors['birth_date'] = $messages['birth_date'];
+} else {
+    $date = DateTime::createFromFormat('Y-m-d', $_POST['birth_date']);
+    if (!$date || $date->format('Y-m-d') !== $_POST['birth_date']) {
+        $errors['birth_date'] = 'Некорректная дата';
+    } elseif ($date > new DateTime()) {
+        $errors['birth_date'] = 'Дата рождения не может быть в будущем';
+    }
+}
+
+// Валидация пола
+if (empty($_POST['gender'])) {
+    $errors['gender'] = 'Выберите пол';
+} elseif (!preg_match($patterns['gender'], $_POST['gender'])) {
+    $errors['gender'] = $messages['gender'];
+}
+
+// Валидация языков
+$allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
+                     'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
+
+if (empty($_POST['languages']) || !is_array($_POST['languages'])) {
+    $errors['languages'] = $messages['languages'];
+} else {
+    foreach ($_POST['languages'] as $lang) {
+        if (!in_array($lang, $allowed_languages)) {
+            $errors['languages'] = 'Выбран недопустимый язык программирования';
+            break;
+        }
+    }
+}
+
+// Валидация чекбокса
+if (empty($_POST['contract'])) {
+    $errors['contract'] = $messages['contract'];
+}
+
+// Если есть ошибки
+if (!empty($errors)) {
+    // Сохраняем ошибки в Cookies (на время сессии)
+    setcookie('form_errors', json_encode($errors), 0, '/');
+    
+    // Сохраняем старые данные в Cookies
+    setcookie('form_old', json_encode($_POST), 0, '/');
+    
+    // Перенаправляем обратно к форме (GET)
+    header('Location: index.php');
+    exit();
+}
+
+// Если ошибок нет - сохраняем в БД и в Cookies на год
+try {
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    $pdo->beginTransaction();
+    
+    // Сохраняем пользователя
+    $stmt = $pdo->prepare("
+        INSERT INTO users (full_name, phone, email, birth_date, gender, biography, contract_accepted) 
+        VALUES (:full_name, :phone, :email, :birth_date, :gender, :biography, :contract_accepted)
+    ");
+    
+    $stmt->execute([
+        ':full_name' => $_POST['full_name'],
+        ':phone' => $_POST['phone'],
+        ':email' => $_POST['email'],
+        ':birth_date' => $_POST['birth_date'],
+        ':gender' => $_POST['gender'],
+        ':biography' => $_POST['biography'] ?? null,
+        ':contract_accepted' => 1
+    ]);
+    
+    $user_id = $pdo->lastInsertId();
+    
+    // Сохраняем языки
+    $lang_stmt = $pdo->prepare("
+        INSERT INTO user_languages (user_id, language_id) 
+        SELECT :user_id, id FROM programming_languages WHERE name = :lang_name
+    ");
+    
+    foreach ($_POST['languages'] as $language) {
+        $lang_stmt->execute([
+            ':user_id' => $user_id,
+            ':lang_name' => $language
+        ]);
+    }
+    
+    $pdo->commit();
+    
+    // Сохраняем данные в Cookies на 1 год
+    setcookie('full_name', $_POST['full_name'], time() + 31536000, '/');
+    setcookie('phone', $_POST['phone'], time() + 31536000, '/');
+    setcookie('email', $_POST['email'], time() + 31536000, '/');
+    setcookie('birth_date', $_POST['birth_date'], time() + 31536000, '/');
+    setcookie('gender', $_POST['gender'], time() + 31536000, '/');
+    setcookie('languages', implode(',', $_POST['languages']), time() + 31536000, '/');
+    setcookie('biography', $_POST['biography'] ?? '', time() + 31536000, '/');
+    setcookie('contract', '1', time() + 31536000, '/');
+    
+    // Сохраняем сообщение об успехе в сессии
+    $_SESSION['success'] = 'Данные успешно сохранены!';
+    
+    header('Location: index.php');
+    exit();
+    
+} catch (PDOException $e) {
+    if (isset($pdo)) {
+        $pdo->rollBack();
+    }
+    
+    $errors['database'] = 'Ошибка при сохранении в базу данных';
+    setcookie('form_errors', json_encode(['database' => 'Ошибка базы данных']), 0, '/');
+    setcookie('form_old', json_encode($_POST), 0, '/');
+    
+    header('Location: index.php');
+    exit();
+}
+?>
