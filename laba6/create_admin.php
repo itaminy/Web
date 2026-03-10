@@ -11,9 +11,8 @@ if (!file_exists($config_file)) {
 }
 require_once $config_file;
 
-// Данные администратора - ИЗМЕНИТЕ НА СВОИ!
-$admin_username = 'admin';
-$admin_password = 'admin123'; // Смените на сложный пароль!
+$admin_username = 'u82382';
+$admin_password = 'Drt#dSRER'; 
 
 try {
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
