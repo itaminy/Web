@@ -7,6 +7,45 @@ if (file_exists($config_file)) {
     require_once $config_file;
 }
 
+// Функция для генерации логина
+function generateLogin($full_name) {
+    // Транслитерация (простая)
+    $converter = [
+        'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
+        'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i',
+        'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n',
+        'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't',
+        'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch',
+        'ш' => 'sh', 'щ' => 'sch', 'ъ' => '', 'ы' => 'y', 'ь' => '',
+        'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
+    ];
+    
+    $name_parts = explode(' ', $full_name);
+    $login = '';
+    
+    if (isset($name_parts[0])) {
+        $first = mb_strtolower($name_parts[0]);
+        $login .= strtr($first, $converter);
+    }
+    if (isset($name_parts[1])) {
+        $last = mb_strtolower(mb_substr($name_parts[1], 0, 2));
+        $login .= strtr($last, $converter);
+    }
+    
+    $login .= rand(100, 999);
+    return $login;
+}
+
+// Функция для генерации пароля
+function generatePassword($length = 8) {
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $chars[random_int(0, strlen($chars) - 1)];
+    }
+    return $password;
+}
+
 // Массив для ошибок
 $errors = [];
 
@@ -96,31 +135,45 @@ if (empty($_POST['contract'])) {
 
 // Если есть ошибки
 if (!empty($errors)) {
-    // Сохраняем ошибки в Cookies (на время сессии)
     setcookie('form_errors', json_encode($errors), 0, '/');
-    
-    // Сохраняем старые данные в Cookies
     setcookie('form_old', json_encode($_POST), 0, '/');
-    
-    // Перенаправляем обратно к форме (GET)
     header('Location: index.php');
     exit();
 }
 
-// Если ошибок нет - сохраняем в БД и в Cookies на год
+// Если ошибок нет - сохраняем в БД
 try {
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $pdo->beginTransaction();
     
+    // Генерируем логин и пароль
+    $login = generateLogin($_POST['full_name']);
+    $password = generatePassword();
+    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+    
+    // Проверяем уникальность логина
+    $check_login = $pdo->prepare("SELECT id FROM users WHERE login = ?");
+    $check_login->execute([$login]);
+    
+    // Если логин уже существует, добавляем еще случайное число
+    $counter = 1;
+    while ($check_login->fetch()) {
+        $login = generateLogin($_POST['full_name']) . $counter;
+        $check_login->execute([$login]);
+        $counter++;
+    }
+    
     // Сохраняем пользователя
     $stmt = $pdo->prepare("
-        INSERT INTO users (full_name, phone, email, birth_date, gender, biography, contract_accepted) 
-        VALUES (:full_name, :phone, :email, :birth_date, :gender, :biography, :contract_accepted)
+        INSERT INTO users (login, password_hash, full_name, phone, email, birth_date, gender, biography, contract_accepted) 
+        VALUES (:login, :password_hash, :full_name, :phone, :email, :birth_date, :gender, :biography, :contract_accepted)
     ");
     
     $stmt->execute([
+        ':login' => $login,
+        ':password_hash' => $password_hash,
         ':full_name' => $_POST['full_name'],
         ':phone' => $_POST['phone'],
         ':email' => $_POST['email'],
@@ -147,6 +200,11 @@ try {
     
     $pdo->commit();
     
+    // Сохраняем логин и пароль в сессии для отображения
+    $_SESSION['new_user_login'] = $login;
+    $_SESSION['new_user_password'] = $password;
+    $_SESSION['success'] = 'Данные успешно сохранены!';
+    
     // Сохраняем данные в Cookies на 1 год
     setcookie('full_name', $_POST['full_name'], time() + 31536000, '/');
     setcookie('phone', $_POST['phone'], time() + 31536000, '/');
@@ -157,9 +215,6 @@ try {
     setcookie('biography', $_POST['biography'] ?? '', time() + 31536000, '/');
     setcookie('contract', '1', time() + 31536000, '/');
     
-    // Сохраняем сообщение об успехе в сессии
-    $_SESSION['success'] = 'Данные успешно сохранены!';
-    
     header('Location: index.php');
     exit();
     
@@ -168,10 +223,8 @@ try {
         $pdo->rollBack();
     }
     
-    $errors['database'] = 'Ошибка при сохранении в базу данных';
     setcookie('form_errors', json_encode(['database' => 'Ошибка базы данных']), 0, '/');
     setcookie('form_old', json_encode($_POST), 0, '/');
-    
     header('Location: index.php');
     exit();
 }
