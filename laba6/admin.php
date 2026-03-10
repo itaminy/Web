@@ -489,4 +489,18 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                                 </form>
                             </td>
                         </tr>
-                    <?php
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <?php if (empty($users)): ?>
+            <p style="text-align: center; padding: 40px; color: #666;">Нет зарегистрированных пользователей</p>
+        <?php endif; ?>
+        
+        <p style="text-align: center; margin-top: 30px;">
+            <a href="index.php" style="color: #667eea;">← Вернуться на главную</a>
+        </p>
+    </div>
+</body>
+</html>
