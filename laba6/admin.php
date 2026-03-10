@@ -168,9 +168,9 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: #000000;
-            color: #00ffff;
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            color: #333333;
             padding: 20px;
         }
         
@@ -179,57 +179,63 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
             margin: 0 auto;
         }
         
-        /* Заголовки */
-        h1, h2, h3 {
-            color: #00ffff;
+        h1 {
+            font-size: 24px;
             margin-bottom: 20px;
-            font-weight: normal;
+            color: #333333;
         }
         
-        h1 {
-            font-size: 32px;
-            border-bottom: 2px solid #00ffff;
-            padding-bottom: 10px;
+        h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333333;
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333333;
         }
         
         /* Статистика */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 30px;
         }
         
         .stat-box {
-            border: 2px solid #00ffff;
-            padding: 20px;
-            text-align: center;
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #dddddd;
         }
         
         .stat-number {
-            font-size: 48px;
-            color: #00ffff;
+            font-size: 32px;
             font-weight: bold;
+            color: #333333;
         }
         
         .stat-label {
-            color: #00ffff;
             font-size: 14px;
-            margin-top: 10px;
+            color: #666666;
+            margin-top: 5px;
         }
         
         /* Языковая статистика */
         .lang-stats {
-            border: 2px solid #00ffff;
-            padding: 20px;
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #dddddd;
             margin-bottom: 30px;
         }
         
         .lang-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #00ffff33;
+            padding: 8px 0;
+            border-bottom: 1px solid #dddddd;
         }
         
         .lang-item:last-child {
@@ -237,65 +243,63 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         }
         
         .lang-name {
-            color: #00ffff;
+            color: #333333;
         }
         
         .lang-count {
-            color: #00ffff;
             font-weight: bold;
+            color: #333333;
         }
         
         /* Сообщения */
         .message {
-            border: 2px solid #00ffff;
-            padding: 15px;
+            padding: 10px 15px;
             margin-bottom: 20px;
-            color: #00ffff;
+            border: 1px solid #dddddd;
         }
         
         .message.success {
-            border-color: #00ffff;
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
         }
         
         .message.error {
-            border-color: #ff0000;
-            color: #ff0000;
+            background: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
         }
         
         /* Форма */
         .edit-form {
-            border: 2px solid #00ffff;
+            background: #f5f5f5;
             padding: 20px;
+            border: 1px solid #dddddd;
             margin-bottom: 30px;
         }
         
         .form-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            color: #00ffff;
             margin-bottom: 5px;
+            font-weight: bold;
             font-size: 14px;
+            color: #333333;
         }
         
         input, select, textarea {
             width: 100%;
-            padding: 10px;
-            background: #000000;
-            border: 2px solid #00ffff;
-            color: #00ffff;
-            font-family: 'Courier New', monospace;
+            padding: 8px;
+            border: 1px solid #cccccc;
+            background: #ffffff;
             font-size: 14px;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            background: #001111;
+            color: #333333;
         }
         
         select[multiple] {
@@ -305,15 +309,14 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         .btn-group {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         button, .btn {
-            background: #000000;
-            border: 2px solid #00ffff;
-            color: #00ffff;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
+            background: #4a90e2;
+            border: none;
+            color: white;
+            padding: 8px 16px;
             font-size: 14px;
             cursor: pointer;
             text-decoration: none;
@@ -321,14 +324,22 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         }
         
         button:hover, .btn:hover {
-            background: #00ffff;
-            color: #000000;
+            background: #357abd;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
         }
         
         /* Таблица */
         .table-section {
-            border: 2px solid #00ffff;
-            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #dddddd;
+            padding: 15px;
         }
         
         table {
@@ -338,42 +349,17 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         
         th {
             text-align: left;
-            padding: 12px;
-            border-bottom: 2px solid #00ffff;
-            color: #00ffff;
-            font-weight: normal;
+            padding: 10px;
+            background: #f5f5f5;
+            border-bottom: 2px solid #dddddd;
+            font-weight: bold;
+            color: #333333;
         }
         
         td {
-            padding: 12px;
-            border-bottom: 1px solid #00ffff33;
-            color: #00ffff;
-        }
-        
-        tr:hover td {
-            background: #001111;
-        }
-        
-        /* Бейджи */
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border: 1px solid #00ffff;
-            font-size: 12px;
-        }
-        
-        .badge-male {
-            border-color: #00ffff;
-        }
-        
-        .badge-female {
-            border-color: #ff00ff;
-            color: #ff00ff;
-        }
-        
-        .badge-other {
-            border-color: #ffff00;
-            color: #ffff00;
+            padding: 10px;
+            border-bottom: 1px solid #eeeeee;
+            color: #333333;
         }
         
         /* Действия */
@@ -383,40 +369,45 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         }
         
         .action-btn {
-            background: none;
-            border: 1px solid #00ffff;
-            color: #00ffff;
+            background: #4a90e2;
+            color: white;
             padding: 4px 8px;
             font-size: 12px;
-            cursor: pointer;
             text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .action-btn.delete {
+            background: #dc3545;
         }
         
         .action-btn:hover {
-            background: #00ffff;
-            color: #000000;
+            opacity: 0.8;
         }
         
-        .action-btn.delete:hover {
-            border-color: #ff0000;
-            background: #ff0000;
-            color: #000000;
+        /* Бейджи */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-size: 12px;
         }
         
-        /* Ссылка */
+        /* Ссылка назад */
         .back-link {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
         }
         
         .back-link a {
-            color: #00ffff;
+            color: #4a90e2;
             text-decoration: none;
-            border-bottom: 1px dashed #00ffff;
         }
         
         .back-link a:hover {
-            border-bottom: 1px solid #00ffff;
+            text-decoration: underline;
         }
         
         /* Адаптивность */
@@ -434,7 +425,7 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
             }
             
             table {
-                font-size: 12px;
+                font-size: 13px;
             }
             
             td, th {
@@ -445,15 +436,15 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
 </head>
 <body>
     <div class="container">
-        <h1>АДМИН ПАНЕЛЬ</h1>
+        <h1>Панель администратора</h1>
         
-        <div style="text-align: right; margin-bottom: 20px; color: #00ffff;">
-            [ <?php echo htmlspecialchars($_SESSION['admin_username']); ?> ]
+        <div style="text-align: right; margin-bottom: 20px;">
+            Вы вошли как: <strong><?php echo htmlspecialchars($_SESSION['admin_username']); ?></strong>
         </div>
         
         <?php if ($message): ?>
             <div class="message <?php echo $message_type; ?>">
-                > <?php echo $message; ?>
+                <?php echo $message; ?>
             </div>
         <?php endif; ?>
         
@@ -461,29 +452,25 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         <div class="stats">
             <div class="stat-box">
                 <div class="stat-number"><?php echo $total_users; ?></div>
-                <div class="stat-label">ПОЛЬЗОВАТЕЛЕЙ</div>
+                <div class="stat-label">Всего пользователей</div>
             </div>
             <div class="stat-box">
                 <div class="stat-number"><?php echo $total_with_languages; ?></div>
-                <div class="stat-label">ВЫБРАЛИ ЯЗЫКИ</div>
+                <div class="stat-label">Выбрали языки</div>
             </div>
             <div class="stat-box">
                 <div class="stat-number"><?php echo count($stats); ?></div>
-                <div class="stat-label">ЯЗЫКОВ</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number"><?php echo date('d.m.Y'); ?></div>
-                <div class="stat-label">ДАТА</div>
+                <div class="stat-label">Языков в списке</div>
             </div>
         </div>
         
         <!-- Языки -->
         <div class="lang-stats">
-            <h3>ЯЗЫКИ ПРОГРАММИРОВАНИЯ</h3>
+            <h3>Популярность языков</h3>
             <?php foreach ($stats as $stat): ?>
                 <div class="lang-item">
-                    <span class="lang-name">> <?php echo str_pad(htmlspecialchars($stat['name']), 12, '.'); ?></span>
-                    <span class="lang-count">[<?php echo $stat['user_count']; ?>]</span>
+                    <span class="lang-name"><?php echo htmlspecialchars($stat['name']); ?></span>
+                    <span class="lang-count"><?php echo $stat['user_count']; ?> пользователей</span>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -491,7 +478,7 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         <!-- Редактирование -->
         <?php if ($edit_user): ?>
             <div class="edit-form">
-                <h3>РЕДАКТИРОВАНИЕ [ID: <?php echo $edit_user['id']; ?>]</h3>
+                <h3>Редактирование пользователя #<?php echo $edit_user['id']; ?></h3>
                 <form action="admin.php" method="POST">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="user_id" value="<?php echo $edit_user['id']; ?>">
@@ -499,36 +486,36 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                     <div class="form-row">
                         <div>
                             <label>ФИО</label>
-                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($edit_user['full_name']); ?>">
+                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($edit_user['full_name']); ?>" required>
                         </div>
                         <div>
-                            <label>ТЕЛЕФОН</label>
-                            <input type="text" name="phone" value="<?php echo htmlspecialchars($edit_user['phone']); ?>">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div>
-                            <label>EMAIL</label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($edit_user['email']); ?>">
-                        </div>
-                        <div>
-                            <label>ДАТА РОЖДЕНИЯ</label>
-                            <input type="date" name="birth_date" value="<?php echo $edit_user['birth_date']; ?>">
+                            <label>Телефон</label>
+                            <input type="text" name="phone" value="<?php echo htmlspecialchars($edit_user['phone']); ?>" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div>
-                            <label>ПОЛ</label>
+                            <label>Email</label>
+                            <input type="email" name="email" value="<?php echo htmlspecialchars($edit_user['email']); ?>" required>
+                        </div>
+                        <div>
+                            <label>Дата рождения</label>
+                            <input type="date" name="birth_date" value="<?php echo $edit_user['birth_date']; ?>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div>
+                            <label>Пол</label>
                             <select name="gender">
-                                <option value="male" <?php echo $edit_user['gender'] == 'male' ? 'selected' : ''; ?>>МУЖСКОЙ</option>
-                                <option value="female" <?php echo $edit_user['gender'] == 'female' ? 'selected' : ''; ?>>ЖЕНСКИЙ</option>
-                                <option value="other" <?php echo $edit_user['gender'] == 'other' ? 'selected' : ''; ?>>ДРУГОЙ</option>
+                                <option value="male" <?php echo $edit_user['gender'] == 'male' ? 'selected' : ''; ?>>Мужской</option>
+                                <option value="female" <?php echo $edit_user['gender'] == 'female' ? 'selected' : ''; ?>>Женский</option>
+                                <option value="other" <?php echo $edit_user['gender'] == 'other' ? 'selected' : ''; ?>>Другой</option>
                             </select>
                         </div>
                         <div>
-                            <label>ЯЗЫКИ</label>
+                            <label>Языки</label>
                             <select name="languages[]" multiple>
                                 <?php foreach ($all_languages as $lang): ?>
                                     <option value="<?php echo $lang; ?>" <?php echo in_array($lang, $edit_user['languages'] ?? []) ? 'selected' : ''; ?>>
@@ -540,13 +527,13 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                     </div>
                     
                     <div>
-                        <label>БИОГРАФИЯ</label>
+                        <label>Биография</label>
                         <textarea name="biography"><?php echo htmlspecialchars($edit_user['biography'] ?? ''); ?></textarea>
                     </div>
                     
                     <div class="btn-group">
-                        <button type="submit">[ СОХРАНИТЬ ]</button>
-                        <a href="admin.php" class="btn">[ ОТМЕНА ]</a>
+                        <button type="submit">Сохранить</button>
+                        <a href="admin.php" class="btn btn-secondary">Отмена</a>
                     </div>
                 </form>
             </div>
@@ -554,20 +541,21 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         
         <!-- Таблица пользователей -->
         <div class="table-section">
-            <h3>СПИСОК ПОЛЬЗОВАТЕЛЕЙ [<?php echo count($users); ?>]</h3>
+            <h3>Список пользователей (<?php echo count($users); ?>)</h3>
             
             <?php if (!empty($users)): ?>
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>ЛОГИН</th>
+                            <th>Логин</th>
                             <th>ФИО</th>
-                            <th>EMAIL</th>
-                            <th>ТЕЛЕФОН</th>
-                            <th>ПОЛ</th>
-                            <th>ЯЗЫКИ</th>
-                            <th>ДЕЙСТВИЯ</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Дата рождения</th>
+                            <th>Пол</th>
+                            <th>Языки</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -578,25 +566,25 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                                 <td><?php echo htmlspecialchars($user['full_name']); ?></td>
                                 <td><?php echo htmlspecialchars($user['email']); ?></td>
                                 <td><?php echo htmlspecialchars($user['phone']); ?></td>
+                                <td><?php echo $user['birth_date']; ?></td>
                                 <td>
                                     <?php
-                                    $gender_class = 'badge-' . ($user['gender'] ?? 'other');
                                     $gender_text = [
                                         'male' => 'М',
                                         'female' => 'Ж',
                                         'other' => '?'
                                     ][$user['gender']] ?? '?';
                                     ?>
-                                    <span class="badge <?php echo $gender_class; ?>"><?php echo $gender_text; ?></span>
+                                    <span class="badge"><?php echo $gender_text; ?></span>
                                 </td>
                                 <td><?php echo htmlspecialchars($user['languages'] ?? '-'); ?></td>
                                 <td>
                                     <div class="actions">
-                                        <a href="?edit=<?php echo $user['id']; ?>" class="action-btn">[Р]</a>
-                                        <form action="admin.php" method="POST" style="display: inline;" onsubmit="return confirm('Удалить?');">
+                                        <a href="?edit=<?php echo $user['id']; ?>" class="action-btn">Ред</a>
+                                        <form action="admin.php" method="POST" style="display: inline;" onsubmit="return confirm('Удалить пользователя?');">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                            <button type="submit" class="action-btn delete">[X]</button>
+                                            <button type="submit" class="action-btn delete">Удал</button>
                                         </form>
                                     </div>
                                 </td>
@@ -605,15 +593,13 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                     </tbody>
                 </table>
             <?php else: ?>
-                <div style="text-align: center; padding: 40px; color: #00ffff;">
-                    > НЕТ ПОЛЬЗОВАТЕЛЕЙ <
-                </div>
+                <p style="text-align: center; padding: 40px; color: #666;">Нет пользователей</p>
             <?php endif; ?>
         </div>
         
         <!-- Навигация -->
         <div class="back-link">
-            <a href="index.php">← НА ГЛАВНУЮ</a>
+            <a href="index.php">← Вернуться на главную</a>
         </div>
     </div>
 </body>
