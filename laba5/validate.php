@@ -7,7 +7,7 @@ if (file_exists($config_file)) {
     require_once $config_file;
 }
 
-// Функция для генерации логина
+// Функция для генерации логина (без mbstring)
 function generateLogin($full_name) {
     // Транслитерация (простая)
     $converter = [
@@ -17,25 +17,46 @@ function generateLogin($full_name) {
         'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't',
         'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch',
         'ш' => 'sh', 'щ' => 'sch', 'ъ' => '', 'ы' => 'y', 'ь' => '',
-        'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
+        'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
+        'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D',
+        'Е' => 'E', 'Ё' => 'E', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I',
+        'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N',
+        'О' => 'O', 'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T',
+        'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'Ts', 'Ч' => 'Ch',
+        'Ш' => 'Sh', 'Щ' => 'Sch', 'Ъ' => '', 'Ы' => 'Y', 'Ь' => '',
+        'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya'
     ];
     
+    // Разбиваем ФИО по пробелам
     $name_parts = explode(' ', $full_name);
     $login = '';
     
+    // Обрабатываем первую часть (имя/фамилия)
     if (isset($name_parts[0])) {
-        $first = mb_strtolower($name_parts[0]);
-        $login .= strtr($first, $converter);
-    }
-    if (isset($name_parts[1])) {
-        $last = mb_strtolower(mb_substr($name_parts[1], 0, 2));
-        $login .= strtr($last, $converter);
+        $first = $name_parts[0];
+        // Транслитерируем
+        $first = strtr($first, $converter);
+        // Приводим к нижнему регистру через стандартную функцию
+        $first = strtolower($first);
+        $login .= $first;
     }
     
+    // Добавляем первые 2 буквы второй части
+    if (isset($name_parts[1])) {
+        $last = substr($name_parts[1], 0, 2);
+        $last = strtr($last, $converter);
+        $last = strtolower($last);
+        $login .= $last;
+    }
+    
+    // Добавляем случайное число
     $login .= rand(100, 999);
+    
+    // Удаляем все кроме букв и цифр
+    $login = preg_replace('/[^a-z0-9]/', '', $login);
+    
     return $login;
 }
-
 // Функция для генерации пароля
 function generatePassword($length = 8) {
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
