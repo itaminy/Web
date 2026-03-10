@@ -1,6 +1,12 @@
 <?php
 session_start();
 
+// Подключение к БД
+$config_file = '/home/u82382/config/laba3/db_config.php';
+if (file_exists($config_file)) {
+    require_once $config_file;
+}
+
 // Загружаем данные из Cookies при первом посещении
 if (!isset($_SESSION['form_errors']) && !isset($_GET['errors'])) {
     $full_name = $_COOKIE['full_name'] ?? '';
@@ -34,13 +40,48 @@ if (isset($_COOKIE['form_old'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Анкета пользователя</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .header-buttons {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .header-buttons a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-left: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+        }
+        .btn-login {
+            background: #667eea;
+        }
+        .btn-admin {
+            background: #28a745;
+        }
+        .login-info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0d47a1;
+        }
+        .login-info code {
+            background: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 1.1em;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- Кнопки входа и админки -->
-        <div style="text-align: right; margin-bottom: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-            <a href="login.php" class="btn-submit" style="padding: 8px 16px; font-size: 14px; width: auto; display: inline-block;">🔐 Войти для редактирования</a>
-            <a href="admin.php" class="btn-submit" style="padding: 8px 16px; font-size: 14px; width: auto; display: inline-block; background: #28a745;">👨‍💼 Админ-панель</a>
+        <div class="header-buttons">
+            <a href="login.php" class="btn-login">🔐 Войти</a>
+            <a href="admin.php" class="btn-admin">👨‍💼 Админ-панель</a>
         </div>
         
         <h1>📝 Анкета пользователя</h1>
@@ -54,11 +95,11 @@ if (isset($_COOKIE['form_old'])) {
         
         // Отображаем логин и пароль для нового пользователя
         if (isset($_SESSION['new_user_login']) && isset($_SESSION['new_user_password'])) {
-            echo '<div class="success-message" style="background-color: #e3f2fd; color: #0d47a1; border-left-color: #0d47a1;">';
+            echo '<div class="login-info">';
             echo '<strong>🎉 Регистрация успешна!</strong><br><br>';
             echo '🔐 <strong>Ваши данные для входа:</strong><br>';
-            echo 'Логин: <code style="background: #f5f5f5; padding: 2px 5px; border-radius: 3px;">' . htmlspecialchars($_SESSION['new_user_login']) . '</code><br>';
-            echo 'Пароль: <code style="background: #f5f5f5; padding: 2px 5px; border-radius: 3px;">' . htmlspecialchars($_SESSION['new_user_password']) . '</code><br><br>';
+            echo 'Логин: <code>' . htmlspecialchars($_SESSION['new_user_login']) . '</code><br>';
+            echo 'Пароль: <code>' . htmlspecialchars($_SESSION['new_user_password']) . '</code><br><br>';
             echo '<small>⚠️ Сохраните эти данные! Они понадобятся для редактирования анкеты.</small>';
             echo '</div>';
             
