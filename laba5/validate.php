@@ -7,9 +7,9 @@ if (file_exists($config_file)) {
     require_once $config_file;
 }
 
-// Функция для генерации логина (без mbstring)
+// Функция для генерации логина (БЕЗ mbstring)
 function generateLogin($full_name) {
-    // Транслитерация (простая)
+    // Транслитерация
     $converter = [
         'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
         'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i',
@@ -27,21 +27,14 @@ function generateLogin($full_name) {
         'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya'
     ];
     
-    // Разбиваем ФИО по пробелам
     $name_parts = explode(' ', $full_name);
     $login = '';
     
-    // Обрабатываем первую часть (имя/фамилия)
     if (isset($name_parts[0])) {
-        $first = $name_parts[0];
-        // Транслитерируем
-        $first = strtr($first, $converter);
-        // Приводим к нижнему регистру через стандартную функцию
+        $first = strtr($name_parts[0], $converter);
         $first = strtolower($first);
         $login .= $first;
     }
-    
-    // Добавляем первые 2 буквы второй части
     if (isset($name_parts[1])) {
         $last = substr($name_parts[1], 0, 2);
         $last = strtr($last, $converter);
@@ -49,14 +42,12 @@ function generateLogin($full_name) {
         $login .= $last;
     }
     
-    // Добавляем случайное число
     $login .= rand(100, 999);
-    
-    // Удаляем все кроме букв и цифр
     $login = preg_replace('/[^a-z0-9]/', '', $login);
     
     return $login;
 }
+
 // Функция для генерации пароля
 function generatePassword($length = 8) {
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
@@ -178,7 +169,6 @@ try {
     $check_login = $pdo->prepare("SELECT id FROM users WHERE login = ?");
     $check_login->execute([$login]);
     
-    // Если логин уже существует, добавляем еще случайное число
     $counter = 1;
     while ($check_login->fetch()) {
         $login = generateLogin($_POST['full_name']) . $counter;
