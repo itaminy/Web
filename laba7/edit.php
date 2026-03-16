@@ -1,38 +1,42 @@
 <?php
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-
 session_start();
 
+// Заголовки безопасности
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+
+// Проверяем авторизацию
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-header("X-Frame-Options: DENY");
-header("X-XSS-Protection: 1; mode=block");
-
+// Подключаем конфиг
 $config_file = '/home/u82382/config/laba3/db_config.php';
-if (!file_exists($config_file)) {
-    die('Ошибка конфигурации');
+if (file_exists($config_file)) {
+    require_once $config_file;
 }
-require_once $config_file;
+
+// Функция экранирования
+function e($data) {
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+}
 
 $message = '';
-$message_type = '';
+$errors = [];
 
+// Получаем данные пользователя
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ]
+    );
     
-    // Получение данных пользователя
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,7 +47,6 @@ try {
         exit();
     }
     
-    // Получение языков
     $lang_stmt = $pdo->prepare("
         SELECT pl.name FROM programming_languages pl
         JOIN user_languages ul ON pl.id = ul.language_id
@@ -53,103 +56,184 @@ try {
     $user_languages = $lang_stmt->fetchAll(PDO::FETCH_COLUMN);
     
 } catch (PDOException $e) {
-    error_log("Edit error: " . $e->getMessage());
+    error_log('Edit page error: ' . $e->getMessage());
     die('Ошибка базы данных');
+}
+
+// Генерация CSRF токена
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Проверка CSRF
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die('Ошибка безопасности');
-    }
-    
-    try {
-        $pdo->beginTransaction();
-        
-        // Обновление данных
-        $update = $pdo->prepare("
-            UPDATE users SET 
-                full_name = ?, phone = ?, email = ?, 
-                birth_date = ?, gender = ?, biography = ?
-            WHERE id = ?
-        ");
-        
-        $update->execute([
-            $_POST['full_name'],
-            $_POST['phone'],
-            $_POST['email'],
-            $_POST['birth_date'],
-            $_POST['gender'],
-            $_POST['biography'] ?? null,
-            $_SESSION['user_id']
-        ]);
-        
-        // Обновление языков
-        $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?")->execute([$_SESSION['user_id']]);
-        
-        if (!empty($_POST['languages']) && is_array($_POST['languages'])) {
-            $lang_stmt = $pdo->prepare("
-                INSERT INTO user_languages (user_id, language_id) 
-                SELECT ?, id FROM programming_languages WHERE name = ?
+        $errors['csrf'] = 'Ошибка безопасности';
+    } else {
+        try {
+            $pdo->beginTransaction();
+            
+            $update = $pdo->prepare("
+                UPDATE users SET 
+                    full_name = ?, 
+                    phone = ?, 
+                    email = ?, 
+                    birth_date = ?, 
+                    gender = ?, 
+                    biography = ?
+                WHERE id = ?
             ");
             
-            foreach ($_POST['languages'] as $language) {
-                $lang_stmt->execute([$_SESSION['user_id'], $language]);
+            $update->execute([
+                $_POST['full_name'],
+                $_POST['phone'],
+                $_POST['email'],
+                $_POST['birth_date'],
+                $_POST['gender'],
+                $_POST['biography'] ?? null,
+                $_SESSION['user_id']
+            ]);
+            
+            $delete = $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?");
+            $delete->execute([$_SESSION['user_id']]);
+            
+            if (!empty($_POST['languages']) && is_array($_POST['languages'])) {
+                $lang_stmt = $pdo->prepare("
+                    INSERT INTO user_languages (user_id, language_id) 
+                    SELECT ?, id FROM programming_languages WHERE name = ?
+                ");
+                
+                foreach ($_POST['languages'] as $language) {
+                    $lang_stmt->execute([$_SESSION['user_id'], $language]);
+                }
             }
+            
+            $pdo->commit();
+            $message = 'Данные успешно обновлены!';
+            
+            // Обновляем данные
+            $user = $_POST;
+            $user_languages = $_POST['languages'] ?? [];
+            
+            // Регенерируем CSRF токен
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            error_log('Edit update error: ' . $e->getMessage());
+            $errors['database'] = 'Ошибка при обновлении данных';
         }
-        
-        $pdo->commit();
-        $message = 'Данные обновлены';
-        $message_type = 'success';
-        
-        // Обновление данных для отображения
-        $user = $_POST;
-        $user_languages = $_POST['languages'] ?? [];
-        
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        error_log("Update error: " . $e->getMessage());
-        $message = 'Ошибка обновления';
-        $message_type = 'error';
     }
 }
-
-$all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
-                 'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Редактирование</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование данных</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <h1>Редактирование профиля</h1>
-            <div>
-                <span>Вы вошли как: <?php echo htmlspecialchars($_SESSION['user_login']); ?></span>
-                <a href="logout.php" style="margin-left: 10px; color: #4a90e2;">Выйти</a>
-            </div>
+        <h1>✏️ Редактирование данных</h1>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <p>Вы вошли как: <strong><?php echo e($_SESSION['user_login']); ?></strong></p>
+            <a href="logout.php" class="btn-submit" style="padding: 8px 16px; font-size: 14px; width: auto;">Выйти</a>
         </div>
         
         <?php if ($message): ?>
-            <div class="<?php echo $message_type === 'success' ? 'success-message' : 'error-message'; ?>">
-                <?php echo htmlspecialchars($message); ?>
+            <div class="success-message"><?php echo e($message); ?></div>
+        <?php endif; ?>
+        
+        <?php if (!empty($errors)): ?>
+            <div class="error-message">
+                <strong>Ошибки:</strong>
+                <ul>
+                    <?php foreach ($errors as $error): ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         <?php endif; ?>
         
-        <form method="POST">
+        <form action="edit.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             
             <div class="form-group">
-                <label>ФИО</label>
-                <input type="text" name="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" required>
+                <label for="full_name">👤 ФИО:</label>
+                <input type="text" id="full_name" name="full_name" 
+                       value="<?php echo e($user['full_name']); ?>" required>
             </div>
-            
+
             <div class="form-group">
-                <label>Телефон</label>
-                <input type="text" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+                <label for="phone">📞 Телефон:</label>
+                <input type="text" id="phone" name="phone" 
+                       value="<?php echo e($user['phone']); ?>" required>
             </div>
-            
+
+            <div class="form-group">
+                <label for="email">✉️ Email:</label>
+                <input type="email" id="email" name="email" 
+                       value="<?php echo e($user['email']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birth_date">🎂 Дата рождения:</label>
+                <input type="date" id="birth_date" name="birth_date" 
+                       value="<?php echo e($user['birth_date']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label>⚥ Пол:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="male" name="gender" value="male" 
+                            <?php echo ($user['gender'] == 'male') ? 'checked' : ''; ?> required>
+                        <label for="male">Мужской</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="female" name="gender" value="female"
+                            <?php echo ($user['gender'] == 'female') ? 'checked' : ''; ?>>
+                        <label for="female">Женский</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="other" name="gender" value="other"
+                            <?php echo ($user['gender'] == 'other') ? 'checked' : ''; ?>>
+                        <label for="other">Другой</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="languages">💻 Любимые языки программирования:</label>
+                <select id="languages" name="languages[]" multiple required>
+                    <?php
+                    $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
+                                     'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
+                    
+                    foreach ($all_languages as $lang) {
+                        $selected = in_array($lang, $user_languages) ? 'selected' : '';
+                        echo "<option value=\"" . e($lang) . "\" $selected>" . e($lang) . "</option>";
+                    }
+                    ?>
+                </select>
+                <small>Удерживайте Ctrl для выбора нескольких языков</small>
+            </div>
+
+            <div class="form-group">
+                <label for="biography">📖 Биография:</label>
+                <textarea id="biography" name="biography"><?php echo e($user['biography'] ?? ''); ?></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">💾 Обновить данные</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 20px;">
+            <a href="index.php">← Вернуться к форме регистрации</a>
+        </p>
+    </div>
+</body>
+</html>
