@@ -1,27 +1,30 @@
 <?php
-// Безопасные настройки
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-
 session_start();
 
-// Проверка CSRF
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    error_log("CSRF attack detected");
-    die('Ошибка безопасности');
-}
+// Заголовки безопасности
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
 
-// Подключение к БД
+// Отключаем вывод ошибок
+ini_set('display_errors', 0);
+error_log(ini_get('error_log'));
+
+// Подключаем конфиг
 $config_file = '/home/u82382/config/laba3/db_config.php';
 if (!file_exists($config_file)) {
-    error_log("Config file not found");
-    die('Ошибка конфигурации');
+    die('Configuration error');
 }
 require_once $config_file;
 
-// Функция генерации логина
+// Проверка CSRF токена
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    error_log('CSRF token mismatch');
+    setcookie('form_errors', json_encode(['csrf' => 'Ошибка безопасности']), 0, '/', '', true, true);
+    header('Location: index.php');
+    exit();
+}
+
+// Функция для генерации логина
 function generateLogin($full_name) {
     $converter = [
         'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
@@ -45,14 +48,14 @@ function generateLogin($full_name) {
     
     if (isset($name_parts[0])) {
         $first = strtr($name_parts[0], $converter);
-        $first = strtolower($first);
-        $login .= $first;
+        $first = preg_replace('/[^a-zA-Z]/', '', $first);
+        $login .= strtolower($first);
     }
     if (isset($name_parts[1])) {
         $last = substr($name_parts[1], 0, 2);
         $last = strtr($last, $converter);
-        $last = strtolower($last);
-        $login .= $last;
+        $last = preg_replace('/[^a-zA-Z]/', '', $last);
+        $login .= strtolower($last);
     }
     
     $login .= rand(100, 999);
@@ -61,7 +64,7 @@ function generateLogin($full_name) {
     return $login;
 }
 
-// Функция генерации пароля
+// Функция для генерации пароля
 function generatePassword($length = 8) {
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $password = '';
@@ -71,85 +74,104 @@ function generatePassword($length = 8) {
     return $password;
 }
 
-// Валидация
+// Массив для ошибок
 $errors = [];
 
-// ФИО
+// Регулярные выражения
+$patterns = [
+    'full_name' => '/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+    'phone' => '/^[\+\d\s\(\)\-]{10,20}$/'
+];
+
+// Валидация ФИО
 if (empty($_POST['full_name'])) {
-    $errors['full_name'] = 'Поле обязательно';
-} elseif (!preg_match('/^[А-Яа-яЁёA-Za-z\s\-]+$/u', $_POST['full_name'])) {
-    $errors['full_name'] = 'Только буквы, пробелы и дефисы';
+    $errors['full_name'] = 'Поле ФИО обязательно';
+} elseif (!preg_match($patterns['full_name'], $_POST['full_name'])) {
+    $errors['full_name'] = 'ФИО должно содержать только буквы, пробелы и дефисы';
 } elseif (strlen($_POST['full_name']) > 150) {
-    $errors['full_name'] = 'Не больше 150 символов';
+    $errors['full_name'] = 'ФИО не должно превышать 150 символов';
+} else {
+    $_POST['full_name'] = trim($_POST['full_name']);
 }
 
-// Телефон
+// Валидация телефона
 if (empty($_POST['phone'])) {
-    $errors['phone'] = 'Поле обязательно';
-} elseif (!preg_match('/^[\+\d\s\(\)\-]{10,20}$/', $_POST['phone'])) {
-    $errors['phone'] = 'Недопустимые символы';
+    $errors['phone'] = 'Поле Телефон обязательно';
+} elseif (!preg_match($patterns['phone'], $_POST['phone'])) {
+    $errors['phone'] = 'Неверный формат телефона';
+} else {
+    $_POST['phone'] = trim($_POST['phone']);
 }
 
-// Email
+// Валидация email
 if (empty($_POST['email'])) {
-    $errors['email'] = 'Поле обязательно';
+    $errors['email'] = 'Поле Email обязательно';
 } elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-    $errors['email'] = 'Некорректный email';
+    $errors['email'] = 'Неверный формат email';
+} else {
+    $_POST['email'] = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
 }
 
-// Дата рождения
+// Валидация даты
 if (empty($_POST['birth_date'])) {
-    $errors['birth_date'] = 'Поле обязательно';
-} elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['birth_date'])) {
-    $errors['birth_date'] = 'Формат ГГГГ-ММ-ДД';
+    $errors['birth_date'] = 'Поле Дата рождения обязательно';
 } else {
     $date = DateTime::createFromFormat('Y-m-d', $_POST['birth_date']);
-    if (!$date || $date > new DateTime()) {
-        $errors['birth_date'] = 'Некорректная дата';
+    if (!$date || $date->format('Y-m-d') !== $_POST['birth_date']) {
+        $errors['birth_date'] = 'Неверный формат даты';
+    } elseif ($date > new DateTime()) {
+        $errors['birth_date'] = 'Дата не может быть в будущем';
     }
 }
 
-// Пол
+// Валидация пола
 $allowed_genders = ['male', 'female', 'other'];
 if (empty($_POST['gender'])) {
     $errors['gender'] = 'Выберите пол';
-} elseif (!in_array($_POST['gender'], $allowed_genders)) {
-    $errors['gender'] = 'Недопустимое значение';
+} elseif (!in_array($_POST['gender'], $allowed_genders, true)) {
+    $errors['gender'] = 'Неверное значение пола';
 }
 
-// Языки
+// Валидация языков
 $allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
                      'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
 
 if (empty($_POST['languages']) || !is_array($_POST['languages'])) {
-    $errors['languages'] = 'Выберите языки';
+    $errors['languages'] = 'Выберите хотя бы один язык';
 } else {
     foreach ($_POST['languages'] as $lang) {
-        if (!in_array($lang, $allowed_languages)) {
+        if (!in_array($lang, $allowed_languages, true)) {
             $errors['languages'] = 'Недопустимый язык';
             break;
         }
     }
 }
 
-// Чекбокс
+// Валидация чекбокса
 if (empty($_POST['contract'])) {
-    $errors['contract'] = 'Примите условия';
+    $errors['contract'] = 'Необходимо подтверждение';
 }
 
 // Если есть ошибки
 if (!empty($errors)) {
-    setcookie('form_errors', json_encode($errors), 0, '/');
-    setcookie('form_old', json_encode($_POST), 0, '/');
+    setcookie('form_errors', json_encode($errors), 0, '/', '', true, true);
+    setcookie('form_old', json_encode($_POST), 0, '/', '', true, true);
     header('Location: index.php');
     exit();
 }
 
 // Сохранение в БД
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
     
     $pdo->beginTransaction();
     
@@ -161,32 +183,39 @@ try {
     // Проверка уникальности логина
     $check = $pdo->prepare("SELECT id FROM users WHERE login = ?");
     $check->execute([$login]);
+    
+    $counter = 1;
     while ($check->fetch()) {
-        $login = generateLogin($_POST['full_name']) . rand(10, 99);
+        $login = generateLogin($_POST['full_name']) . $counter;
         $check->execute([$login]);
+        $counter++;
     }
     
-    // Сохранение пользователя
+    // Вставка пользователя
     $stmt = $pdo->prepare("
-        INSERT INTO users (login, password_hash, full_name, phone, email, birth_date, gender, biography, contract_accepted) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (
+            login, password_hash, full_name, phone, email, 
+            birth_date, gender, biography, contract_accepted
+        ) VALUES (
+            :login, :password_hash, :full_name, :phone, :email,
+            :birth_date, :gender, :biography, 1
+        )
     ");
     
     $stmt->execute([
-        $login,
-        $password_hash,
-        $_POST['full_name'],
-        $_POST['phone'],
-        $_POST['email'],
-        $_POST['birth_date'],
-        $_POST['gender'],
-        $_POST['biography'] ?? null,
-        1
+        ':login' => $login,
+        ':password_hash' => $password_hash,
+        ':full_name' => $_POST['full_name'],
+        ':phone' => $_POST['phone'],
+        ':email' => $_POST['email'],
+        ':birth_date' => $_POST['birth_date'],
+        ':gender' => $_POST['gender'],
+        ':biography' => $_POST['biography'] ?? null
     ]);
     
     $user_id = $pdo->lastInsertId();
     
-    // Сохранение языков
+    // Вставка языков
     $lang_stmt = $pdo->prepare("
         INSERT INTO user_languages (user_id, language_id) 
         SELECT ?, id FROM programming_languages WHERE name = ?
@@ -198,19 +227,32 @@ try {
     
     $pdo->commit();
     
-    // Сохранение в сессию
+    // Сохраняем в сессию
     $_SESSION['new_user_login'] = $login;
     $_SESSION['new_user_password'] = $password;
-    $_SESSION['success'] = 'Регистрация успешна!';
+    $_SESSION['success'] = 'Данные сохранены!';
     
-    // Сохранение в Cookies
-    setcookie('full_name', $_POST['full_name'], time() + 31536000, '/', '', false, true);
-    setcookie('phone', $_POST['phone'], time() + 31536000, '/', '', false, true);
-    setcookie('email', $_POST['email'], time() + 31536000, '/', '', false, true);
-    setcookie('birth_date', $_POST['birth_date'], time() + 31536000, '/', '', false, true);
-    setcookie('gender', $_POST['gender'], time() + 31536000, '/', '', false, true);
-    setcookie('languages', implode(',', $_POST['languages']), time() + 31536000, '/', '', false, true);
-    setcookie('biography', $_POST['biography'] ?? '', time() + 31536000, '/', '', false, true);
+    // Cookies на год (Secure, HttpOnly)
+    $cookie_params = [
+        'expires' => time() + 31536000,
+        'path' => '/',
+        'domain' => '',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ];
+    
+    setcookie('full_name', $_POST['full_name'], $cookie_params);
+    setcookie('phone', $_POST['phone'], $cookie_params);
+    setcookie('email', $_POST['email'], $cookie_params);
+    setcookie('birth_date', $_POST['birth_date'], $cookie_params);
+    setcookie('gender', $_POST['gender'], $cookie_params);
+    setcookie('languages', implode(',', $_POST['languages']), $cookie_params);
+    setcookie('biography', $_POST['biography'] ?? '', $cookie_params);
+    setcookie('contract', '1', $cookie_params);
+    
+    // Удаляем старый CSRF токен
+    unset($_SESSION['csrf_token']);
     
     header('Location: index.php');
     exit();
@@ -219,10 +261,12 @@ try {
     if (isset($pdo)) {
         $pdo->rollBack();
     }
-    error_log("Database error: " . $e->getMessage());
     
-    setcookie('form_errors', json_encode(['database' => 'Ошибка сохранения']), 0, '/');
-    setcookie('form_old', json_encode($_POST), 0, '/');
+    // Логируем ошибку
+    error_log('Database error in validate.php: ' . $e->getMessage());
+    
+    setcookie('form_errors', json_encode(['database' => 'Ошибка базы данных']), 0, '/', '', true, true);
+    setcookie('form_old', json_encode($_POST), 0, '/', '', true, true);
     header('Location: index.php');
     exit();
 }
