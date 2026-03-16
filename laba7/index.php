@@ -215,7 +215,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <input type="checkbox" id="contract" name="contract" value="1" 
                         <?php echo (($old['contract'] ?? $contract ?? '') == '1') ? 'checked' : ''; ?> required>
                     <label for="contract">Я ознакомлен(а) с условиями контракта</label>
-                </div>
+            </div>
                 <?php if (isset($errors['contract'])): ?>
                     <small class="error-text"><?php echo e($errors['contract']); ?></small>
                 <?php endif; ?>
