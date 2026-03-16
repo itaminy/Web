@@ -1,12 +1,29 @@
 <?php
 session_start();
 
-// Подключение к БД
+// Заголовки безопасности
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+
+// Отключаем вывод ошибок
+ini_set('display_errors', 0);
+
+// Подключаем конфиг
 $config_file = '/home/u82382/config/laba3/db_config.php';
 if (!file_exists($config_file)) {
-    die('Ошибка конфигурации сервера');
+    die('Configuration error');
 }
 require_once $config_file;
+
+// Функция экранирования
+function e($data) {
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+// Функция для валидации ID
+function validateId($id) {
+    return filter_var($id, FILTER_VALIDATE_INT) !== false && $id > 0;
+}
 
 // HTTP-авторизация
 if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
@@ -16,10 +33,17 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
     exit;
 }
 
-// Проверка авторизации через БД
+// Проверка авторизации
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET, DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ]
+    );
     
     $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
     $stmt->execute([$_SERVER['PHP_AUTH_USER']]);
@@ -32,11 +56,17 @@ try {
         exit;
     }
     
-    $_SESSION['admin_id'] = $admin['id'];
+    $_SESSION['admin_id'] = (int)$admin['id'];
     $_SESSION['admin_username'] = $admin['username'];
     
 } catch (PDOException $e) {
-    die('Ошибка подключения к базе данных');
+    error_log('Admin DB error: ' . $e->getMessage());
+    die('Ошибка подключения к БД');
+}
+
+// Генерация CSRF токена
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Обработка действий
@@ -44,16 +74,20 @@ $message = '';
 $message_type = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
+    // Проверка CSRF
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $message = 'Ошибка безопасности';
+        $message_type = 'error';
+    } elseif (isset($_POST['action'])) {
         try {
-            if ($_POST['action'] === 'delete' && isset($_POST['user_id'])) {
+            if ($_POST['action'] === 'delete' && isset($_POST['user_id']) && validateId($_POST['user_id'])) {
                 $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-                $stmt->execute([$_POST['user_id']]);
+                $stmt->execute([(int)$_POST['user_id']]);
                 $message = "Пользователь удален";
                 $message_type = 'success';
             }
             
-            if ($_POST['action'] === 'update' && isset($_POST['user_id'])) {
+            if ($_POST['action'] === 'update' && isset($_POST['user_id']) && validateId($_POST['user_id'])) {
                 $pdo->beginTransaction();
                 
                 $stmt = $pdo->prepare("
@@ -73,19 +107,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['birth_date'],
                     $_POST['gender'],
                     $_POST['biography'],
-                    $_POST['user_id']
+                    (int)$_POST['user_id']
                 ]);
                 
                 if (isset($_POST['languages']) && is_array($_POST['languages'])) {
-                    $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?")->execute([$_POST['user_id']]);
+                    // Удаляем старые языки
+                    $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?")->execute([(int)$_POST['user_id']]);
                     
+                    // Добавляем новые
                     $lang_stmt = $pdo->prepare("
                         INSERT INTO user_languages (user_id, language_id) 
                         SELECT ?, id FROM programming_languages WHERE name = ?
                     ");
                     
                     foreach ($_POST['languages'] as $lang) {
-                        $lang_stmt->execute([$_POST['user_id'], $lang]);
+                        $lang_stmt->execute([(int)$_POST['user_id'], $lang]);
                     }
                 }
                 
@@ -98,7 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($pdo)) {
                 $pdo->rollBack();
             }
-            $message = "Ошибка";
+            error_log('Admin action error: ' . $e->getMessage());
+            $message = "Ошибка базы данных";
             $message_type = 'error';
         }
     }
@@ -131,13 +168,15 @@ try {
     ")->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
+    error_log('Admin data error: ' . $e->getMessage());
     die('Ошибка получения данных');
 }
 
+// Получение данных для редактирования
 $edit_user = null;
-if (isset($_GET['edit'])) {
+if (isset($_GET['edit']) && validateId($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$_GET['edit']]);
+    $stmt->execute([(int)$_GET['edit']]);
     $edit_user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($edit_user) {
@@ -146,7 +185,7 @@ if (isset($_GET['edit'])) {
             JOIN user_languages ul ON pl.id = ul.language_id
             WHERE ul.user_id = ?
         ");
-        $lang_stmt->execute([$_GET['edit']]);
+        $lang_stmt->execute([(int)$_GET['edit']]);
         $edit_user['languages'] = $lang_stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 }
@@ -439,23 +478,23 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         <h1>Панель администратора</h1>
         
         <div style="text-align: right; margin-bottom: 20px;">
-            Вы вошли как: <strong><?php echo htmlspecialchars($_SESSION['admin_username']); ?></strong>
+            Вы вошли как: <strong><?php echo e($_SESSION['admin_username']); ?></strong>
         </div>
         
         <?php if ($message): ?>
-            <div class="message <?php echo $message_type; ?>">
-                <?php echo $message; ?>
+            <div class="message <?php echo e($message_type); ?>">
+                <?php echo e($message); ?>
             </div>
         <?php endif; ?>
         
         <!-- Статистика -->
         <div class="stats">
             <div class="stat-box">
-                <div class="stat-number"><?php echo $total_users; ?></div>
+                <div class="stat-number"><?php echo (int)$total_users; ?></div>
                 <div class="stat-label">Всего пользователей</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number"><?php echo $total_with_languages; ?></div>
+                <div class="stat-number"><?php echo (int)$total_with_languages; ?></div>
                 <div class="stat-label">Выбрали языки</div>
             </div>
             <div class="stat-box">
@@ -469,8 +508,8 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
             <h3>Популярность языков</h3>
             <?php foreach ($stats as $stat): ?>
                 <div class="lang-item">
-                    <span class="lang-name"><?php echo htmlspecialchars($stat['name']); ?></span>
-                    <span class="lang-count"><?php echo $stat['user_count']; ?> пользователей</span>
+                    <span class="lang-name"><?php echo e($stat['name']); ?></span>
+                    <span class="lang-count"><?php echo (int)$stat['user_count']; ?> пользователей</span>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -478,30 +517,31 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
         <!-- Редактирование -->
         <?php if ($edit_user): ?>
             <div class="edit-form">
-                <h3>Редактирование пользователя #<?php echo $edit_user['id']; ?></h3>
+                <h3>Редактирование пользователя #<?php echo (int)$edit_user['id']; ?></h3>
                 <form action="admin.php" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="user_id" value="<?php echo $edit_user['id']; ?>">
+                    <input type="hidden" name="user_id" value="<?php echo (int)$edit_user['id']; ?>">
                     
                     <div class="form-row">
                         <div>
                             <label>ФИО</label>
-                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($edit_user['full_name']); ?>" required>
+                            <input type="text" name="full_name" value="<?php echo e($edit_user['full_name']); ?>" required>
                         </div>
                         <div>
                             <label>Телефон</label>
-                            <input type="text" name="phone" value="<?php echo htmlspecialchars($edit_user['phone']); ?>" required>
+                            <input type="text" name="phone" value="<?php echo e($edit_user['phone']); ?>" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div>
                             <label>Email</label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($edit_user['email']); ?>" required>
+                            <input type="email" name="email" value="<?php echo e($edit_user['email']); ?>" required>
                         </div>
                         <div>
                             <label>Дата рождения</label>
-                            <input type="date" name="birth_date" value="<?php echo $edit_user['birth_date']; ?>" required>
+                            <input type="date" name="birth_date" value="<?php echo e($edit_user['birth_date']); ?>" required>
                         </div>
                     </div>
                     
@@ -518,8 +558,8 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                             <label>Языки</label>
                             <select name="languages[]" multiple>
                                 <?php foreach ($all_languages as $lang): ?>
-                                    <option value="<?php echo $lang; ?>" <?php echo in_array($lang, $edit_user['languages'] ?? []) ? 'selected' : ''; ?>>
-                                        <?php echo $lang; ?>
+                                    <option value="<?php echo e($lang); ?>" <?php echo in_array($lang, $edit_user['languages'] ?? []) ? 'selected' : ''; ?>>
+                                        <?php echo e($lang); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -528,7 +568,7 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                     
                     <div>
                         <label>Биография</label>
-                        <textarea name="biography"><?php echo htmlspecialchars($edit_user['biography'] ?? ''); ?></textarea>
+                        <textarea name="biography"><?php echo e($edit_user['biography'] ?? ''); ?></textarea>
                     </div>
                     
                     <div class="btn-group">
@@ -561,12 +601,12 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                     <tbody>
                         <?php foreach ($users as $user): ?>
                             <tr>
-                                <td><?php echo $user['id']; ?></td>
-                                <td><?php echo htmlspecialchars($user['login'] ?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                <td><?php echo htmlspecialchars($user['phone']); ?></td>
-                                <td><?php echo $user['birth_date']; ?></td>
+                                <td><?php echo (int)$user['id']; ?></td>
+                                <td><?php echo e($user['login'] ?? '-'); ?></td>
+                                <td><?php echo e($user['full_name']); ?></td>
+                                <td><?php echo e($user['email']); ?></td>
+                                <td><?php echo e($user['phone']); ?></td>
+                                <td><?php echo e($user['birth_date']); ?></td>
                                 <td>
                                     <?php
                                     $gender_text = [
@@ -575,15 +615,16 @@ $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python',
                                         'other' => '?'
                                     ][$user['gender']] ?? '?';
                                     ?>
-                                    <span class="badge"><?php echo $gender_text; ?></span>
+                                    <span class="badge"><?php echo e($gender_text); ?></span>
                                 </td>
-                                <td><?php echo htmlspecialchars($user['languages'] ?? '-'); ?></td>
+                                <td><?php echo e($user['languages'] ?? '-'); ?></td>
                                 <td>
                                     <div class="actions">
-                                        <a href="?edit=<?php echo $user['id']; ?>" class="action-btn">Ред</a>
+                                        <a href="?edit=<?php echo (int)$user['id']; ?>" class="action-btn">Ред</a>
                                         <form action="admin.php" method="POST" style="display: inline;" onsubmit="return confirm('Удалить пользователя?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                             <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                            <input type="hidden" name="user_id" value="<?php echo (int)$user['id']; ?>">
                                             <button type="submit" class="action-btn delete">Удал</button>
                                         </form>
                                     </div>
