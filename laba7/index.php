@@ -203,21 +203,21 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
             </div>
 
-            <!-- Биография -->
+          <!-- Биография -->
             <div class="form-group">
                 <label for="biography">📖 Биография:</label>
-                <textarea id="biography" name="biography" placeholder="Расскажите о себе..."><?php echo e($old['biography'] ?? $biography ?? ''); ?></textarea>
+                <textarea id="biography" name="biography" placeholder="Расскажите о себе..."><?php echo htmlspecialchars($old['biography'] ?? $biography ?? ''); ?></textarea>
             </div>
 
-            <!-- Чекбокс -->
+            <!-- Чекбокс с контрактом -->
             <div class="form-group <?php echo isset($errors['contract']) ? 'has-error' : ''; ?>">
                 <div class="checkbox-group">
                     <input type="checkbox" id="contract" name="contract" value="1" 
                         <?php echo (($old['contract'] ?? $contract ?? '') == '1') ? 'checked' : ''; ?> required>
                     <label for="contract">Я ознакомлен(а) с условиями контракта</label>
-            </div>
+                </div>
                 <?php if (isset($errors['contract'])): ?>
-                    <small class="error-text"><?php echo e($errors['contract']); ?></small>
+                    <small class="error-text"><?php echo $errors['contract']; ?></small>
                 <?php endif; ?>
             </div>
 
@@ -225,7 +225,7 @@ if (empty($_SESSION['csrf_token'])) {
         </form>
         
         <p style="text-align: center; margin-top: 20px; color: #888;">
-            <small>После регистрации вы получите логин и пароль</small>
+            <small>После регистрации вы получите логин и пароль для редактирования анкеты</small>
         </p>
     </div>
 </body>
