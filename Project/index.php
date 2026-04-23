@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Дополнительные стили для форм и уведомлений */
         .form-modal {
             display: none;
             position: fixed;
@@ -20,9 +19,7 @@
             justify-content: center;
             align-items: center;
         }
-        .form-modal.active {
-            display: flex;
-        }
+        .form-modal.active { display: flex; }
         .form-modal-content {
             background: white;
             padding: 30px;
@@ -37,10 +34,6 @@
             right: 20px;
             font-size: 28px;
             cursor: pointer;
-            color: #999;
-        }
-        .form-modal-close:hover {
-            color: #f14d34;
         }
         .login-credentials {
             background: #f0f9ff;
@@ -53,13 +46,8 @@
             background: #e0e0e0;
             padding: 3px 8px;
             border-radius: 4px;
-            font-size: 1.1em;
         }
-        .auth-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .auth-buttons { display: flex; gap: 10px; align-items: center; }
         .login-btn, .logout-btn, .edit-profile-btn {
             background: #4a90e2;
             color: white;
@@ -68,17 +56,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 13px;
-            transition: all 0.3s ease;
         }
-        .logout-btn {
-            background: #dc3545;
-        }
-        .edit-profile-btn {
-            background: #28a745;
-        }
-        .login-btn:hover, .logout-btn:hover, .edit-profile-btn:hover {
-            transform: translateY(-2px);
-        }
+        .logout-btn { background: #dc3545; }
+        .edit-profile-btn { background: #28a745; }
         .user-info {
             display: flex;
             align-items: center;
@@ -87,10 +67,7 @@
             padding: 5px 15px;
             border-radius: 30px;
         }
-        .user-info span {
-            color: white;
-            font-weight: 500;
-        }
+        .user-info span { color: white; font-weight: 500; }
         .edit-form-container {
             display: none;
             position: fixed;
@@ -105,9 +82,7 @@
             overflow-y: auto;
             padding: 20px;
         }
-        .edit-form-container.active {
-            display: flex;
-        }
+        .edit-form-container.active { display: flex; }
         .edit-form-content {
             background: white;
             padding: 30px;
@@ -117,9 +92,7 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
         .form-group label {
             display: block;
             margin-bottom: 8px;
@@ -133,15 +106,8 @@
             border-radius: 6px;
             font-size: 14px;
         }
-        .form-group select[multiple] {
-            height: 120px;
-        }
-        .error-text {
-            color: #f14d34;
-            font-size: 12px;
-            margin-top: 5px;
-            display: block;
-        }
+        .form-group select[multiple] { height: 120px; }
+        .error-text { color: #f14d34; font-size: 12px; margin-top: 5px; display: block; }
         .notification {
             position: fixed;
             top: 20px;
@@ -153,24 +119,12 @@
             animation: slideInRight 0.3s ease;
             max-width: 400px;
         }
-        .notification-success {
-            background: #4CAF50;
-        }
-        .notification-error {
-            background: #f14d34;
-        }
-        .notification-info {
-            background: #2196F3;
-        }
+        .notification-success { background: #4CAF50; }
+        .notification-error { background: #f14d34; }
+        .notification-info { background: #2196F3; }
         @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
@@ -182,7 +136,6 @@
             </video>
             <div class="video-overlay"></div>
         </div>
-
         <nav class="navbar">
             <div class="nav-container">
                 <div class="logo">
@@ -220,21 +173,17 @@
                 </div>
             </div>
         </nav>
-
         <div class="hero">
             <h1 class="hero-title">Поддержка сайтов на Drupal</h1>
             <p class="hero-subtitle">Сопровождение и поддержка сайтов на CMS Drupal любых версий и запущенности</p>
             <button class="btn-primary hero-btn" onclick="document.querySelector('.contact-form').scrollIntoView({behavior: 'smooth'})">ПОДДЕРЖКА DRUPAL</button>
         </div>
     </header>
-
     <main>
-        <!-- Форма анкеты -->
         <section class="contact-form" id="registerForm">
             <div class="container">
                 <h2 class="section-title">Регистрация / Заполнение анкеты</h2>
                 <div id="formErrors" class="error-message" style="display:none;"></div>
-                
                 <form id="mainForm" class="support-form" method="POST" action="validate.php">
                     <div class="form-row">
                         <div class="form-group">
@@ -290,8 +239,6 @@
                 </form>
             </div>
         </section>
-
-        <!-- Модальное окно с логином/паролем -->
         <div id="credentialsModal" class="form-modal">
             <div class="form-modal-content">
                 <span class="form-modal-close" onclick="closeCredentialsModal()">&times;</span>
@@ -300,8 +247,6 @@
                 <button class="btn-primary" onclick="closeCredentialsModal()" style="width:100%;">Закрыть</button>
             </div>
         </div>
-
-        <!-- Форма входа -->
         <div id="loginModal" class="form-modal">
             <div class="form-modal-content">
                 <span class="form-modal-close" onclick="closeLoginModal()">&times;</span>
@@ -320,68 +265,24 @@
                 </form>
             </div>
         </div>
-
-        <!-- Форма редактирования -->
         <div id="editModal" class="edit-form-container">
             <div class="edit-form-content">
                 <h3>✏️ Редактирование профиля</h3>
                 <div id="editErrors" class="error-message" style="display:none;"></div>
                 <form id="editFormElement">
                     <input type="hidden" id="edit_user_id">
-                    <div class="form-group">
-                        <label>ФИО</label>
-                        <input type="text" id="edit_full_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Телефон</label>
-                        <input type="text" id="edit_phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="edit_email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Дата рождения</label>
-                        <input type="date" id="edit_birth_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Пол</label>
-                        <select id="edit_gender">
-                            <option value="male">Мужской</option>
-                            <option value="female">Женский</option>
-                            <option value="other">Другой</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Языки программирования</label>
-                        <select id="edit_languages" multiple>
-                            <option value="Pascal">Pascal</option>
-                            <option value="C">C</option>
-                            <option value="C++">C++</option>
-                            <option value="JavaScript">JavaScript</option>
-                            <option value="PHP">PHP</option>
-                            <option value="Python">Python</option>
-                            <option value="Java">Java</option>
-                            <option value="Haskell">Haskell</option>
-                            <option value="Clojure">Clojure</option>
-                            <option value="Prolog">Prolog</option>
-                            <option value="Scala">Scala</option>
-                            <option value="Go">Go</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Биография</label>
-                        <textarea id="edit_biography" rows="4"></textarea>
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <button type="submit" class="btn-primary">Сохранить</button>
-                        <button type="button" class="btn-secondary" onclick="closeEditModal()">Отмена</button>
-                    </div>
+                    <div class="form-group"><label>ФИО</label><input type="text" id="edit_full_name" required></div>
+                    <div class="form-group"><label>Телефон</label><input type="text" id="edit_phone" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="edit_email" required></div>
+                    <div class="form-group"><label>Дата рождения</label><input type="date" id="edit_birth_date" required></div>
+                    <div class="form-group"><label>Пол</label><select id="edit_gender"><option value="male">Мужской</option><option value="female">Женский</option><option value="other">Другой</option></select></div>
+                    <div class="form-group"><label>Языки</label><select id="edit_languages" multiple><option value="Pascal">Pascal</option><option value="C">C</option><option value="C++">C++</option><option value="JavaScript">JavaScript</option><option value="PHP">PHP</option><option value="Python">Python</option><option value="Java">Java</option><option value="Haskell">Haskell</option><option value="Clojure">Clojure</option><option value="Prolog">Prolog</option><option value="Scala">Scala</option><option value="Go">Go</option></select></div>
+                    <div class="form-group"><label>Биография</label><textarea id="edit_biography" rows="4"></textarea></div>
+                    <div style="display:flex; gap:10px;"><button type="submit" class="btn-primary">Сохранить</button><button type="button" class="btn-secondary" onclick="closeEditModal()">Отмена</button></div>
                 </form>
             </div>
         </div>
     </main>
-
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -390,7 +291,15 @@
             </div>
         </div>
     </footer>
-
     <script src="script.js"></script>
+    <script>
+        window.showLoginModal = function() { document.getElementById('loginModal').classList.add('active'); };
+        window.closeLoginModal = function() { document.getElementById('loginModal').classList.remove('active'); };
+        window.closeCredentialsModal = function() { document.getElementById('credentialsModal').classList.remove('active'); };
+        window.closeEditModal = function() { document.getElementById('editModal').classList.remove('active'); };
+        window.showLogin = window.showLoginModal;
+        window.editProfile = window.showEditModal;
+        window.logoutUser = function() { fetch('/logout.php').then(() => location.reload()); };
+    </script>
 </body>
 </html>
