@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // ========== ЭЛЕМЕНТЫ ==========
   const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
   const mobileMenu = document.querySelector(".mobile-menu");
   const mobileClose = document.querySelector(".mobile-close");
@@ -9,11 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginFormElement");
   const editForm = document.getElementById("editFormElement");
 
-  // ========== ПЕРЕМЕННЫЕ СОСТОЯНИЯ ==========
   let currentUserId = null;
   let isLoggedIn = false;
 
-  // ========== МОБИЛЬНОЕ МЕНЮ ==========
   function initMobileMenu() {
     if (mobileMenuToggle && mobileMenu) {
       mobileMenuToggle.addEventListener("click", function (e) {
@@ -21,9 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
         toggleMobileMenu();
       });
       if (mobileClose) {
-        mobileClose.addEventListener("click", function () {
-          closeMobileMenu();
-        });
+        mobileClose.addEventListener("click", function () { closeMobileMenu(); });
       }
       mobileDropdowns.forEach((dropdown) => {
         const header = dropdown.querySelector(".mobile-dropdown-header");
@@ -40,17 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
       document.addEventListener("click", function (e) {
-        if (
-          mobileMenu &&
-          mobileMenuToggle &&
-          !mobileMenu.contains(e.target) &&
-          !mobileMenuToggle.contains(e.target)
-        ) {
-          closeMobileMenu();
-        }
-      });
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && mobileMenu && mobileMenu.classList.contains("active")) {
+        if (mobileMenu && mobileMenuToggle && !mobileMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
           closeMobileMenu();
         }
       });
@@ -71,16 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.classList.add("menu-open");
     const overlay = document.createElement("div");
     overlay.className = "mobile-menu-overlay";
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1999;
-      animation: fadeIn 0.3s ease;
-    `;
+    overlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1999;animation:fadeIn 0.3s ease;`;
     overlay.addEventListener("click", closeMobileMenu);
     document.body.appendChild(overlay);
   }
@@ -91,12 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.classList.remove("menu-open");
     const overlay = document.querySelector(".mobile-menu-overlay");
     if (overlay) overlay.remove();
-    mobileDropdowns.forEach((dropdown) => {
-      dropdown.classList.remove("active");
-    });
+    mobileDropdowns.forEach((dropdown) => { dropdown.classList.remove("active"); });
   }
 
-  // ========== ПЛАВНАЯ ПРОКРУТКА ==========
   function initSmoothScroll() {
     navLinks.forEach((link) => {
       link.addEventListener("click", function (e) {
@@ -108,117 +81,48 @@ document.addEventListener("DOMContentLoaded", function () {
           const headerHeight = document.querySelector(".navbar")?.offsetHeight || 80;
           const targetPosition = targetElement.offsetTop - headerHeight - 20;
           window.scrollTo({ top: targetPosition, behavior: "smooth" });
-          if (mobileMenu && mobileMenu.classList.contains("active")) {
-            closeMobileMenu();
-          }
+          if (mobileMenu && mobileMenu.classList.contains("active")) { closeMobileMenu(); }
         }
       });
     });
   }
 
-  // ========== УВЕДОМЛЕНИЯ ==========
   function showNotification(message, type = "success") {
     const existing = document.querySelector(".notification");
     if (existing) existing.remove();
     const notification = document.createElement("div");
     notification.className = `notification notification-${type}`;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: ${type === "success" ? "#4CAF50" : type === "error" ? "#f14d34" : "#2196F3"};
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      z-index: 10000;
-      max-width: 400px;
-      animation: slideInRight 0.3s ease-out;
-    `;
+    notification.style.cssText = `position:fixed;top:20px;right:20px;background:${type === "success" ? "#4CAF50" : type === "error" ? "#f14d34" : "#2196F3"};color:white;padding:15px 20px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:10000;max-width:400px;animation:slideInRight 0.3s ease-out;`;
     notification.innerHTML = `<div class="notification-content"><span class="notification-message">${message}</span><button class="notification-close" style="margin-left:15px;background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button></div>`;
     document.body.appendChild(notification);
     const closeBtn = notification.querySelector(".notification-close");
-    closeBtn.addEventListener("click", () => {
-      notification.remove();
-    });
-    setTimeout(() => {
-      if (notification.parentNode) notification.remove();
-    }, 5000);
+    closeBtn.addEventListener("click", () => { notification.remove(); });
+    setTimeout(() => { if (notification.parentNode) notification.remove(); }, 5000);
   }
 
-  // ========== ОТОБРАЖЕНИЕ ОШИБОК ==========
-  function displayErrors(containerId, errors) {
-    const container = document.getElementById(containerId);
-    if (container && errors && Object.keys(errors).length > 0) {
-      container.style.display = "block";
-      let errorHtml = "<ul>";
-      for (const [key, value] of Object.entries(errors)) {
-        errorHtml += `<li>${value}</li>`;
-      }
-      errorHtml += "</ul>";
-      container.innerHTML = errorHtml;
-    } else if (container) {
-      container.style.display = "none";
-      container.innerHTML = "";
-    }
-  }
-
-  // ========== ПОКАЗ МОДАЛЬНОГО ОКНА С ЛОГИНОМ/ПАРОЛЕМ ==========
   function showCredentialsModal(login, password) {
     const modal = document.getElementById("credentialsModal");
     const content = document.getElementById("credentialsContent");
     if (modal && content) {
-      content.innerHTML = `
-        <div class="login-credentials">
-          <p><strong>✅ Вы успешно зарегистрированы!</strong></p>
-          <p>🔐 <strong>Ваши данные для входа:</strong></p>
-          <p>Логин: <code>${login}</code></p>
-          <p>Пароль: <code>${password}</code></p>
-          <p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p>
-        </div>
-      `;
+      content.innerHTML = `<div class="login-credentials"><p><strong>✅ Вы успешно зарегистрированы!</strong></p><p>🔐 <strong>Ваши данные для входа:</strong></p><p>Логин: <code>${login}</code></p><p>Пароль: <code>${password}</code></p><p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p></div>`;
       modal.classList.add("active");
     }
   }
 
-  function closeCredentialsModal() {
-    const modal = document.getElementById("credentialsModal");
-    if (modal) modal.classList.remove("active");
-  }
+  function closeCredentialsModal() { const modal = document.getElementById("credentialsModal"); if (modal) modal.classList.remove("active"); }
+  function showLoginModal() { const modal = document.getElementById("loginModal"); if (modal) modal.classList.add("active"); }
+  function closeLoginModal() { const modal = document.getElementById("loginModal"); if (modal) modal.classList.remove("active"); }
+  function closeEditModal() { const modal = document.getElementById("editModal"); if (modal) modal.classList.remove("active"); }
 
-  // ========== МОДАЛЬНОЕ ОКНО ВХОДА ==========
-  function showLoginModal() {
-    const modal = document.getElementById("loginModal");
-    if (modal) {
-      document.getElementById("login_username").value = "";
-      document.getElementById("login_password").value = "";
-      displayErrors("loginErrors", {});
-      modal.classList.add("active");
-    }
-  }
-
-  function closeLoginModal() {
-    const modal = document.getElementById("loginModal");
-    if (modal) modal.classList.remove("active");
-  }
-
-  // ========== ФОРМА РЕДАКТИРОВАНИЯ ==========
   function showEditModal() {
     if (!isLoggedIn || !currentUserId) {
       showNotification("Пожалуйста, сначала войдите в систему", "error");
       return;
     }
-    fetch(`/api/users/${currentUserId}`, {
-      method: "GET",
-      credentials: "same-origin",
-      headers: { "Accept": "application/json" }
-    })
+    fetch(`/api/users/${currentUserId}`, { method: "GET", credentials: "same-origin", headers: { "Accept": "application/json" } })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          showNotification(data.error, "error");
-          return;
-        }
+        if (data.error) { showNotification(data.error, "error"); return; }
         document.getElementById("edit_user_id").value = data.id;
         document.getElementById("edit_full_name").value = data.full_name || "";
         document.getElementById("edit_phone").value = data.phone || "";
@@ -227,37 +131,21 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("edit_gender").value = data.gender || "male";
         const langSelect = document.getElementById("edit_languages");
         if (langSelect && data.languages) {
-          Array.from(langSelect.options).forEach(opt => {
-            opt.selected = data.languages.includes(opt.value);
-          });
+          Array.from(langSelect.options).forEach(opt => { opt.selected = data.languages.includes(opt.value); });
         }
         document.getElementById("edit_biography").value = data.biography || "";
         document.getElementById("editModal").classList.add("active");
       })
-      .catch(err => {
-        showNotification("Ошибка загрузки данных", "error");
-      });
+      .catch(() => { showNotification("Ошибка загрузки данных", "error"); });
   }
 
-  function closeEditModal() {
-    document.getElementById("editModal").classList.remove("active");
-    displayErrors("editErrors", {});
-  }
-
-  // ========== ОБНОВЛЕНИЕ КНОПОК В ШАПКЕ ==========
   function updateAuthButtons() {
     const authContainer = document.getElementById("authButtons");
     if (!authContainer) return;
     if (isLoggedIn) {
-      authContainer.innerHTML = `
-        <div class="user-info">
-          <span>👤 ${sessionStorage.getItem("user_login") || "Пользователь"}</span>
-          <button class="edit-profile-btn" onclick="window.editProfile && window.editProfile()">Редактировать</button>
-          <button class="logout-btn" onclick="window.logoutUser && window.logoutUser()">Выйти</button>
-        </div>
-      `;
+      authContainer.innerHTML = `<div class="user-info"><span>👤 ${sessionStorage.getItem("user_login") || "Пользователь"}</span><button class="edit-profile-btn" onclick="window.editProfile()">Редактировать</button><button class="logout-btn" onclick="window.logoutUser()">Выйти</button></div>`;
     } else {
-      authContainer.innerHTML = `<button class="login-btn" onclick="window.showLogin && window.showLogin()">Войти</button>`;
+      authContainer.innerHTML = `<button class="login-btn" onclick="window.showLogin()">Войти</button>`;
     }
   }
 
@@ -265,30 +153,12 @@ document.addEventListener("DOMContentLoaded", function () {
   window.editProfile = showEditModal;
   window.logoutUser = function() {
     fetch("/logout.php", { method: "GET", credentials: "same-origin" })
-      .then(() => {
-        sessionStorage.clear();
-        isLoggedIn = false;
-        currentUserId = null;
-        updateAuthButtons();
-        showNotification("Вы вышли из системы", "info");
-        setTimeout(() => location.reload(), 1500);
-      })
-      .catch(() => {
-        sessionStorage.clear();
-        isLoggedIn = false;
-        currentUserId = null;
-        updateAuthButtons();
-        location.reload();
-      });
+      .then(() => { sessionStorage.clear(); isLoggedIn = false; currentUserId = null; updateAuthButtons(); showNotification("Вы вышли из системы", "info"); setTimeout(() => location.reload(), 1500); })
+      .catch(() => { sessionStorage.clear(); isLoggedIn = false; currentUserId = null; updateAuthButtons(); location.reload(); });
   };
 
-  // ========== ПРОВЕРКА СТАТУСА АВТОРИЗАЦИИ ==========
   function checkAuthStatus() {
-    fetch("/api/check-auth", {
-      method: "GET",
-      credentials: "same-origin",
-      headers: { "Accept": "application/json" }
-    })
+    fetch("/check-auth.php", { method: "GET", credentials: "same-origin", headers: { "Accept": "application/json" } })
       .then(res => res.json())
       .catch(() => ({}))
       .then(data => {
@@ -305,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // ========== ОТПРАВКА ФОРМЫ (РЕГИСТРАЦИЯ) ==========
   async function submitForm(formData) {
     const formObject = {
       full_name: formData.get("full_name"),
@@ -359,7 +228,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // ========== ОТПРАВКА ФОРМЫ ВХОДА ==========
   async function submitLogin(login, password) {
     try {
       const response = await fetch("/login.php", {
@@ -383,7 +251,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // ========== ОТПРАВКА ФОРМЫ РЕДАКТИРОВАНИЯ ==========
   async function submitEdit(userId, formData) {
     const formObject = {
       full_name: formData.get("full_name"),
@@ -424,7 +291,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // ========== ОБРАБОТЧИКИ ФОРМ ==========
   if (mainForm) {
     mainForm.addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -451,29 +317,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // ========== АНИМАЦИИ ПРИ СКРОЛЛЕ ==========
   function initScrollAnimations() {
-    const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("fade-in-up");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-    document.querySelectorAll(".service-card, .feature-card, .pricing-card, .task-card, .team-member, .case-card, .client-logo, .faq-item")
-      .forEach(el => observer.observe(el));
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("fade-in-up"); observer.unobserve(entry.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll(".service-card, .feature-card, .pricing-card, .task-card, .team-member, .case-card, .client-logo, .faq-item").forEach(el => observer.observe(el));
   }
 
   function initStickyNav() {
     const navbar = document.querySelector(".navbar");
-    window.addEventListener("scroll", () => {
-      if (navbar) {
-        if (window.scrollY > 100) navbar.classList.add("scrolled");
-        else navbar.classList.remove("scrolled");
-      }
-    });
+    window.addEventListener("scroll", () => { if (navbar) { if (window.scrollY > 100) navbar.classList.add("scrolled"); else navbar.classList.remove("scrolled"); } });
   }
 
   function initCounters() {
@@ -483,16 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const counter = entry.target;
           const target = parseInt(counter.textContent);
           let count = 0;
-          const updateCount = () => {
-            const increment = target / 200;
-            if (count < target) {
-              count += increment;
-              counter.textContent = Math.ceil(count);
-              setTimeout(updateCount, 1);
-            } else {
-              counter.textContent = target;
-            }
-          };
+          const updateCount = () => { const increment = target / 200; if (count < target) { count += increment; counter.textContent = Math.ceil(count); setTimeout(updateCount, 1); } else { counter.textContent = target; } };
           updateCount();
           observer.unobserve(counter);
         }
@@ -501,7 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".stat-number").forEach(counter => observer.observe(counter));
   }
 
-  // ========== ЗАПУСК ==========
   initMobileMenu();
   initSmoothScroll();
   initScrollAnimations();
@@ -509,11 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initCounters();
   checkAuthStatus();
 
-  // Обработка кликов по кнопкам тарифов
   document.querySelectorAll(".pricing-card button").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.querySelector(".contact-form").scrollIntoView({ behavior: "smooth" });
-    });
+    btn.addEventListener("click", (e) => { e.stopPropagation(); document.querySelector(".contact-form").scrollIntoView({ behavior: "smooth" }); });
   });
 });
