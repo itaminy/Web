@@ -51,52 +51,113 @@
             100% { transform: translateX(-50%); }
         }
         
-        /* Более человечный стиль отзыва */
-        .review-card {
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            max-width: 900px;
+        /* Стили для анкеты */
+        .anketa-form {
+            max-width: 700px;
             margin: 0 auto;
-            position: relative;
         }
-        .review-card:before {
-            content: "“";
-            font-size: 100px;
-            color: var(--primary-color);
-            opacity: 0.3;
-            position: absolute;
-            top: 20px;
-            left: 30px;
-            font-family: Georgia, serif;
+        .anketa-form .form-group {
+            margin-bottom: 25px;
         }
-        .review-content p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: var(--text-dark);
-            font-style: normal;
-            text-align: justify;
+        .anketa-form input, 
+        .anketa-form select, 
+        .anketa-form textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-family: "Montserrat", sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
         }
-        .review-author {
-            border-top: 2px solid var(--border-color);
-            padding-top: 25px;
-            margin-top: 20px;
+        .anketa-form input:focus,
+        .anketa-form select:focus,
+        .anketa-form textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(241, 77, 52, 0.1);
         }
-        .review-author strong {
+        .anketa-form select[multiple] {
+            height: 140px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4caf50;
+        }
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #f44336;
+        }
+        .login-info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2196f3;
+            text-align: center;
+        }
+        .login-info code {
+            background: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .has-error input, .has-error select {
+            border-color: #f44336 !important;
+            background-color: #fff8f8;
+        }
+        .error-text {
+            color: #f44336;
+            font-size: 0.85em;
+            margin-top: 5px;
             display: block;
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            margin-bottom: 5px;
         }
         
-        /* Адаптивность карусели */
         @media (max-width: 768px) {
             .client-logo { min-width: 140px; margin: 0 15px; }
             .client-logo img { height: 45px; }
-            .review-card { padding: 30px 25px; }
-            .review-card:before { font-size: 60px; top: 10px; left: 20px; }
-            .review-content p { font-size: 1rem; }
+            .radio-group { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
@@ -194,7 +255,7 @@
         <div class="hero">
             <h1 class="hero-title">Поддержка сайтов на Drupal</h1>
             <p class="hero-subtitle">Сопровождение и поддержка сайтов на CMS Drupal любых версий и запущенности</p>
-            <button class="btn-primary hero-btn" onclick="document.querySelector('.contact-form').scrollIntoView({behavior: 'smooth'})">ПОДДЕРЖКА DRUPAL</button>
+            <button class="btn-primary hero-btn" onclick="document.querySelector('.anketa-section').scrollIntoView({behavior: 'smooth'})">ПОДДЕРЖКА DRUPAL</button>
         </div>
     </header>
 
@@ -240,11 +301,11 @@
             <div class="container">
                 <h2 class="section-title">Тарифы</h2>
                 <div class="pricing-grid">
-                    <div class="pricing-card"><div class="pricing-header"><h3>Стартовый</h3><div class="price">от 6 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Невоспользованные оплаченные часы переносятся на следующий месяц</li></ul><button class="btn-secondary" onclick="document.querySelector('.contact-form').scrollIntoView({behavior:'smooth'})">Свяжитесь с нами!</button></div>
-                    <div class="pricing-card featured"><div class="pricing-badge">Бизнес</div><div class="pricing-header"><h3>Бизнес</h3><div class="price">от 30 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Высокое время реакции - до 2 рабочих дней</li><li>Неиспользованные оплаченные часы не переносятся</li></ul><button class="btn-primary" onclick="document.querySelector('.contact-form').scrollIntoView({behavior:'smooth'})">Свяжитесь с нами!</button></div>
-                    <div class="pricing-card"><div class="pricing-header"><h3>VIP</h3><div class="price">от 270 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Максимальное время реакции - в день обращения</li><li>Невоспользованные оплаченные часы не переносятся</li></ul><button class="btn-secondary" onclick="document.querySelector('.contact-form').scrollIntoView({behavior:'smooth'})">Выбрать тариф</button></div>
+                    <div class="pricing-card"><div class="pricing-header"><h3>Стартовый</h3><div class="price">от 6 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Невоспользованные оплаченные часы переносятся на следующий месяц</li></ul><button class="btn-secondary" onclick="document.querySelector('.anketa-section').scrollIntoView({behavior:'smooth'})">Свяжитесь с нами!</button></div>
+                    <div class="pricing-card featured"><div class="pricing-badge">Бизнес</div><div class="pricing-header"><h3>Бизнес</h3><div class="price">от 30 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Высокое время реакции - до 2 рабочих дней</li><li>Неиспользованные оплаченные часы не переносятся</li></ul><button class="btn-primary" onclick="document.querySelector('.anketa-section').scrollIntoView({behavior:'smooth'})">Свяжитесь с нами!</button></div>
+                    <div class="pricing-card"><div class="pricing-header"><h3>VIP</h3><div class="price">от 270 000 ₽/мес</div></div><ul class="pricing-features"><li>Консультации и работы по SEO</li><li>Услуги дизайнера</li><li>Максимальное время реакции - в день обращения</li><li>Невоспользованные оплаченные часы не переносятся</li></ul><button class="btn-secondary" onclick="document.querySelector('.anketa-section').scrollIntoView({behavior:'smooth'})">Выбрать тариф</button></div>
                 </div>
-                <div class="pricing-cta"><p>Вам не подходят наши тарифы? Оставьте заявку и мы предложим вам индивидуальный тариф!</p><button class="btn-outline" onclick="document.querySelector('.contact-form').scrollIntoView({behavior:'smooth'})">Получить индивидуальный тариф</button></div>
+                <div class="pricing-cta"><p>Вам не подходят наши тарифы? Оставьте заявку и мы предложим вам индивидуальный тариф!</p><button class="btn-outline" onclick="document.querySelector('.anketa-section').scrollIntoView({behavior:'smooth'})">Получить индивидуальный тариф</button></div>
             </div>
         </section>
 
@@ -287,16 +348,16 @@
             </div>
         </section>
 
-        <!-- Отзывы (человечный текст) -->
+        <!-- Отзывы -->
         <section class="reviews">
             <div class="container">
                 <h2 class="section-title">Отзывы</h2>
                 <div class="review-card">
                     <div class="review-content">
-                        <p>«Ребята из Drupal-coder — настоящие профессионалы своего дела! Когда наш сайт www.cielparfum.com начал постоянно "вылетать" и тормозить, мы отчаялись найти толкового специалиста. Но команда Drupal-coder не просто починила всё — они полностью преобразили сайт! Сделали редизайн, настроили поиск, меню, провели конкурсы и тесты. Любая мелочь — и они уже на связи. Особенно хочу поблагодарить Алексея за оперативность, Сергея за креативные идеи, Надежду и Романа за то, что всегда на страже порядка. Спасибо за вашу работу!»</p>
+                        <p>«Ребята из Drupal-coder — настоящие профессионалы своего дела! Когда наш сайт www.cielparfum.com начал постоянно "вылетать" и тормозить, мы отчаялись найти толкового специалиста. Но команда Drupal-coder не просто починила всё — они полностью преобразили сайт! Сделали редизайн, настроили поиск, меню, провели конкурсы и тесты. Любая мелочь — и они уже на связи. Особенно хочу поблагодарить Алексея за оперативность, Сергея за креативные идеи, Надежду и Романа за то, что всегда на страже порядка. Спасибо за вашу работу! Теперь мы спим спокойно — сайт в надёжных руках.»</p>
                     </div>
                     <div class="review-author">
-                        <strong>Наталья </strong>
+                        <strong>Наталья Сучкова</strong>
                         <span>Руководитель отдела веб-проектов, ГК «СИ ЭЛЬ ПАРФЮМ»</span>
                         <a href="http://www.cielparfum.com/">www.cielparfum.com</a>
                     </div>
@@ -304,7 +365,7 @@
             </div>
         </section>
 
-        <!-- Клиенты (карусель с автопрокруткой) -->
+        <!-- Клиенты (карусель) -->
         <section class="clients">
             <div class="container">
                 <h2 class="section-title">С нами работают</h2>
@@ -312,14 +373,12 @@
                 
                 <div class="clients-carousel">
                     <div class="clients-track">
-                        <!-- Первая копия логотипов -->
                         <div class="client-logo"><img src="images/farbors_ru.jpg" alt="Фарборс"></div>
                         <div class="client-logo"><img src="images/cableman_ru.png" alt="Cableman"></div>
                         <div class="client-logo"><img src="images/logo-estee.png" alt="Estee"></div>
                         <div class="client-logo"><img src="images/lpcma_rus_v4.jpg" alt="Библиотека"></div>
                         <div class="client-logo"><img src="images/logo_2.png" alt="Sexclos.Ag"></div>
                         <div class="client-logo"><img src="images/nashagazeta_ch.png" alt="Наша газета"></div>
-                        <!-- Дубликат для бесшовной анимации -->
                         <div class="client-logo"><img src="images/farbors_ru.jpg" alt="Фарборс"></div>
                         <div class="client-logo"><img src="images/cableman_ru.png" alt="Cableman"></div>
                         <div class="client-logo"><img src="images/logo-estee.png" alt="Estee"></div>
@@ -346,17 +405,141 @@
             </div>
         </section>
 
-        <!-- Форма связи -->
-        <section class="contact-form">
+        <!-- АНКЕТА ПОЛЬЗОВАТЕЛЯ (из вашего старого бэкенда) -->
+        <section class="contact-form anketa-section">
             <div class="container">
-                <h2 class="section-title">Оставить заявку на поддержку сайта</h2>
-                <form id="supportForm" class="support-form">
-                    <div class="form-row"><div class="form-group"><input type="text" id="name" name="name" placeholder="Ваше имя" required></div><div class="form-group"><input type="tel" id="phone" name="phone" placeholder="Телефон" required></div></div>
-                    <div class="form-group"><input type="email" id="email" name="email" placeholder="E-mail" required></div>
-                    <div class="form-group"><textarea id="message" name="message" placeholder="Комментарий" rows="4"></textarea></div>
-                    <button type="submit" class="btn-primary form-submit">Отправить</button>
+                <h2 class="section-title">📝 Анкета пользователя</h2>
+                <p class="section-subtitle">Заполните форму, и мы свяжемся с вами</p>
+                
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="success-message"><?php echo e($_SESSION['success']); unset($_SESSION['success']); ?></div>
+                <?php endif; ?>
+                
+                <?php if (isset($_SESSION['new_user_login']) && isset($_SESSION['new_user_password'])): ?>
+                    <div class="login-info">
+                        <strong>🎉 Регистрация успешна!</strong><br><br>
+                        🔐 <strong>Ваши данные для входа:</strong><br>
+                        Логин: <code><?php echo e($_SESSION['new_user_login']); ?></code><br>
+                        Пароль: <code><?php echo e($_SESSION['new_user_password']); ?></code><br><br>
+                        <small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small>
+                    </div>
+                    <?php 
+                    unset($_SESSION['new_user_login']);
+                    unset($_SESSION['new_user_password']);
+                    ?>
+                <?php endif; ?>
+                
+                <?php if (!empty($errors)): ?>
+                    <div class="error-message">
+                        <strong>Пожалуйста, исправьте ошибки:</strong>
+                    </div>
+                <?php endif; ?>
+
+                <form action="validate.php" method="POST" class="anketa-form">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    
+                    <!-- ФИО -->
+                    <div class="form-group <?php echo isset($errors['full_name']) ? 'has-error' : ''; ?>">
+                        <input type="text" id="full_name" name="full_name" 
+                               placeholder="👤 ФИО (Иванов Иван Иванович)"
+                               value="<?php echo e($old['full_name'] ?? $full_name ?? ''); ?>"
+                               maxlength="150" required>
+                        <?php if (isset($errors['full_name'])): ?>
+                            <small class="error-text"><?php echo e($errors['full_name']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Телефон -->
+                    <div class="form-group <?php echo isset($errors['phone']) ? 'has-error' : ''; ?>">
+                        <input type="tel" id="phone" name="phone" 
+                               placeholder="📞 Телефон (+7 999 123-45-67)"
+                               value="<?php echo e($old['phone'] ?? $phone ?? ''); ?>" required>
+                        <?php if (isset($errors['phone'])): ?>
+                            <small class="error-text"><?php echo e($errors['phone']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group <?php echo isset($errors['email']) ? 'has-error' : ''; ?>">
+                        <input type="email" id="email" name="email" 
+                               placeholder="✉️ Email (example@mail.com)"
+                               value="<?php echo e($old['email'] ?? $email ?? ''); ?>" required>
+                        <?php if (isset($errors['email'])): ?>
+                            <small class="error-text"><?php echo e($errors['email']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Дата рождения -->
+                    <div class="form-group <?php echo isset($errors['birth_date']) ? 'has-error' : ''; ?>">
+                        <input type="date" id="birth_date" name="birth_date" 
+                               value="<?php echo e($old['birth_date'] ?? $birth_date ?? ''); ?>" required>
+                        <?php if (isset($errors['birth_date'])): ?>
+                            <small class="error-text"><?php echo e($errors['birth_date']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Пол -->
+                    <div class="form-group <?php echo isset($errors['gender']) ? 'has-error' : ''; ?>">
+                        <select id="gender" name="gender" required>
+                            <option value="">⚥ Выберите пол</option>
+                            <option value="male" <?php echo (($old['gender'] ?? $gender ?? '') == 'male') ? 'selected' : ''; ?>>Мужской</option>
+                            <option value="female" <?php echo (($old['gender'] ?? $gender ?? '') == 'female') ? 'selected' : ''; ?>>Женский</option>
+                            <option value="other" <?php echo (($old['gender'] ?? $gender ?? '') == 'other') ? 'selected' : ''; ?>>Другой</option>
+                        </select>
+                        <?php if (isset($errors['gender'])): ?>
+                            <small class="error-text"><?php echo e($errors['gender']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Языки программирования -->
+                    <div class="form-group <?php echo isset($errors['languages']) ? 'has-error' : ''; ?>">
+                        <select id="languages" name="languages[]" multiple required>
+                            <?php
+                            $all_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 
+                                             'Java', 'Haskell', 'Clojure', 'Prolog', 'Scala', 'Go'];
+                            $selected_langs = $old['languages'] ?? $languages ?? [];
+                            
+                            foreach ($all_languages as $lang): 
+                                $selected = in_array($lang, $selected_langs) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo e($lang); ?>" <?php echo $selected; ?>><?php echo e($lang); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>📌 Удерживайте Ctrl для выбора нескольких языков</small>
+                        <?php if (isset($errors['languages'])): ?>
+                            <small class="error-text"><?php echo e($errors['languages']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Биография -->
+                    <div class="form-group">
+                        <textarea id="biography" name="biography" placeholder="📖 Биография (расскажите о себе)" rows="4"><?php echo htmlspecialchars($old['biography'] ?? $biography ?? ''); ?></textarea>
+                    </div>
+
+                    <!-- Чекбокс контракта -->
+                    <div class="form-group <?php echo isset($errors['contract']) ? 'has-error' : ''; ?>">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="contract" name="contract" value="1" 
+                                <?php echo (($old['contract'] ?? $contract ?? '') == '1') ? 'checked' : ''; ?> required>
+                            <label for="contract">✅ Я ознакомлен(а) с условиями контракта</label>
+                        </div>
+                        <?php if (isset($errors['contract'])): ?>
+                            <small class="error-text"><?php echo e($errors['contract']); ?></small>
+                        <?php endif; ?>
+                    </div>
+
+                    <button type="submit" class="btn-primary form-submit">💾 Зарегистрироваться</button>
                 </form>
-                <div class="form-contacts"><div class="contact-item"><strong>8 800 222-26-73</strong></div><div class="contact-item"><strong>info@drupal-coder.ru</strong></div></div>
+                
+                <div class="form-contacts" style="margin-top: 30px; text-align: center;">
+                    <div class="contact-item"><strong>📞 8 800 222-26-73</strong></div>
+                    <div class="contact-item"><strong>✉️ info@drupal-coder.ru</strong></div>
+                    <div style="margin-top: 15px;">
+                        <a href="login.php" style="color: var(--primary-color); text-decoration: none;">🔐 Уже зарегистрированы? Войдите</a>
+                        <span style="margin: 0 10px">|</span>
+                        <a href="admin.php" style="color: var(--primary-color); text-decoration: none;">👨‍💼 Админ-панель</a>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -371,5 +554,30 @@
     </footer>
 
     <script src="script.js"></script>
+    <?php
+    // Загружаем данные из Cookies для PHP части
+    if (!isset($_SESSION['form_errors']) && !isset($_GET['errors'])) {
+        $full_name = $_COOKIE['full_name'] ?? '';
+        $phone = $_COOKIE['phone'] ?? '';
+        $email = $_COOKIE['email'] ?? '';
+        $birth_date = $_COOKIE['birth_date'] ?? '';
+        $gender = $_COOKIE['gender'] ?? '';
+        $languages = isset($_COOKIE['languages']) ? explode(',', $_COOKIE['languages']) : [];
+        $biography = $_COOKIE['biography'] ?? '';
+        $contract = $_COOKIE['contract'] ?? '';
+    }
+    
+    $errors = [];
+    if (isset($_COOKIE['form_errors'])) {
+        $errors = json_decode($_COOKIE['form_errors'], true);
+        setcookie('form_errors', '', time() - 3600, '/', '', true, true);
+    }
+    
+    $old = [];
+    if (isset($_COOKIE['form_old'])) {
+        $old = json_decode($_COOKIE['form_old'], true);
+        setcookie('form_old', '', time() - 3600, '/', '', true, true);
+    }
+    ?>
 </body>
 </html>
