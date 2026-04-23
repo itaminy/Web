@@ -1,3 +1,48 @@
+<?php
+session_start();
+
+// Подключаем конфиг
+$config_file = '/home/u82382/config/laba3/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации сервера');
+}
+require_once $config_file;
+
+// Функция экранирования
+function e($data) {
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+// Загружаем данные из Cookies
+$full_name = $_COOKIE['full_name'] ?? '';
+$phone = $_COOKIE['phone'] ?? '';
+$email = $_COOKIE['email'] ?? '';
+$birth_date = $_COOKIE['birth_date'] ?? '';
+$gender = $_COOKIE['gender'] ?? '';
+$languages = isset($_COOKIE['languages']) ? explode(',', $_COOKIE['languages']) : [];
+$biography = $_COOKIE['biography'] ?? '';
+$contract = $_COOKIE['contract'] ?? '';
+
+// Получаем ошибки из Cookies
+$errors = [];
+if (isset($_COOKIE['form_errors'])) {
+    $errors = json_decode($_COOKIE['form_errors'], true);
+    setcookie('form_errors', '', time() - 3600, '/', '', true, true);
+}
+
+// Получаем старые данные
+$old = [];
+if (isset($_COOKIE['form_old'])) {
+    $old = json_decode($_COOKIE['form_old'], true);
+    setcookie('form_old', '', time() - 3600, '/', '', true, true);
+}
+
+// Генерация CSRF токена
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+    
 <!DOCTYPE html>
 <html lang="ru">
 <head>
