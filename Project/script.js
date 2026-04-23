@@ -183,56 +183,71 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function submitForm(formData) {
-    const formObject = {
-      full_name: formData.get("full_name"),
-      phone: formData.get("phone"),
-      email: formData.get("email"),
-      birth_date: formData.get("birth_date"),
-      gender: formData.get("gender"),
-      languages: formData.getAll("languages"),
-      biography: formData.get("biography") || "",
-      contract: formData.get("contract") ? "1" : ""
-    };
-    try {
-      const response = await fetch(`${BASE_PATH}/api.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify(formObject)
-      });
-      const result = await response.json();
-      if (response.ok && result.success) {
-        showNotification("Регистрация успешна!", "success");
-        showCredentialsModal(result.login, result.password);
-        if (mainForm) mainForm.reset();
-        return true;
-      } else {
-        if (result.errors) {
-          let errorMsg = "";
-          for (const [key, value] of Object.entries(result.errors)) {
-            errorMsg += `${value}\n`;
-            const field = document.querySelector(`[name="${key}"]`);
-            if (field) {
-              field.style.borderColor = "#f14d34";
+    // Правильный сбор выбранных языков из select
+    const languagesSelect = document.getElementById("languages");
+    const selectedLanguages = [];
+    if (languagesSelect) {
+        for (let i = 0; i < languagesSelect.options.length; i++) {
+            if (languagesSelect.options[i].selected) {
+                selectedLanguages.push(languagesSelect.options[i].value);
             }
-          }
-          showNotification(errorMsg, "error");
+        }
+    }
+    
+    const formObject = {
+        full_name: formData.get("full_name") || document.getElementById("full_name")?.value || "",
+        phone: formData.get("phone") || document.getElementById("phone")?.value || "",
+        email: formData.get("email") || document.getElementById("email")?.value || "",
+        birth_date: formData.get("birth_date") || document.getElementById("birth_date")?.value || "",
+        gender: formData.get("gender") || document.getElementById("gender")?.value || "",
+        languages: selectedLanguages,
+        biography: formData.get("biography") || document.getElementById("biography")?.value || "",
+        contract: (formData.get("contract") || document.getElementById("contract")?.checked) ? "1" : ""
+    };
+    
+    console.log("📤 Отправляемые данные:", formObject);  // Отладка в консоли
+    
+    try {
+        const response = await fetch(`${BASE_PATH}/api.php`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify(formObject)
+        });
+        const result = await response.json();
+        console.log("📥 Ответ сервера:", result);  // Отладка в консоли
+        
+        if (response.ok && result.success) {
+            showNotification("Регистрация успешна!", "success");
+            showCredentialsModal(result.login, result.password);
+            if (mainForm) mainForm.reset();
+            return true;
         } else {
-          showNotification(result.error || "Ошибка регистрации", "error");
+            if (result.errors) {
+                let errorMsg = "";
+                for (const [key, value] of Object.entries(result.errors)) {
+                    errorMsg += `${value}\n`;
+                    const field = document.getElementById(key);
+                    if (field) {
+                        field.style.borderColor = "#f14d34";
+                    }
+                }
+                showNotification(errorMsg, "error");
+            } else {
+                showNotification(result.error || "Ошибка регистрации", "error");
+            }
+            return false;
+        }
+    } catch (err) {
+        console.error("Fetch error:", err);
+        showNotification("Ошибка соединения. Форма отправлена обычным способом.", "error");
+        if (mainForm) {
+            mainForm.removeEventListener("submit", handleSubmit);
+            mainForm.submit();
         }
         return false;
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      showNotification("Ошибка соединения. Форма отправлена обычным способом.", "error");
-      // Фоллбек: отправляем форму обычным POST
-      if (mainForm) {
-        mainForm.removeEventListener("submit", handleSubmit);
-        mainForm.submit();
-      }
-      return false;
     }
-  }
+}
 
   async function submitLogin(login, password) {
     try {
