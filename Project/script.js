@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentUserId = null;
   let isLoggedIn = false;
 
+  // Базовый путь (если сайт в подпапке)
+  const BASE_PATH = "/Web/Project";
+
   function initMobileMenu() {
     if (mobileMenuToggle && mobileMenu) {
       mobileMenuToggle.addEventListener("click", function (e) {
@@ -119,7 +122,11 @@ document.addEventListener("DOMContentLoaded", function () {
       showNotification("Пожалуйста, сначала войдите в систему", "error");
       return;
     }
-    fetch(`/api/users/${currentUserId}`, { method: "GET", credentials: "same-origin", headers: { "Accept": "application/json" } })
+    fetch(`${BASE_PATH}/api.php?action=get&id=${currentUserId}`, { 
+      method: "GET", 
+      credentials: "same-origin", 
+      headers: { "Accept": "application/json" } 
+    })
       .then(res => res.json())
       .then(data => {
         if (data.error) { showNotification(data.error, "error"); return; }
@@ -152,13 +159,13 @@ document.addEventListener("DOMContentLoaded", function () {
   window.showLogin = showLoginModal;
   window.editProfile = showEditModal;
   window.logoutUser = function() {
-    fetch("/logout.php", { method: "GET", credentials: "same-origin" })
+    fetch(`${BASE_PATH}/logout.php`, { method: "GET", credentials: "same-origin" })
       .then(() => { sessionStorage.clear(); isLoggedIn = false; currentUserId = null; updateAuthButtons(); showNotification("Вы вышли из системы", "info"); setTimeout(() => location.reload(), 1500); })
       .catch(() => { sessionStorage.clear(); isLoggedIn = false; currentUserId = null; updateAuthButtons(); location.reload(); });
   };
 
   function checkAuthStatus() {
-    fetch("/check-auth.php", { method: "GET", credentials: "same-origin", headers: { "Accept": "application/json" } })
+    fetch(`${BASE_PATH}/check-auth.php`, { method: "GET", credentials: "same-origin", headers: { "Accept": "application/json" } })
       .then(res => res.json())
       .catch(() => ({}))
       .then(data => {
@@ -187,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
       contract: formData.get("contract") ? "1" : ""
     };
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch(`${BASE_PATH}/api.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         credentials: "same-origin",
@@ -197,23 +204,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (response.ok && result.success) {
         showNotification("Регистрация успешна!", "success");
         showCredentialsModal(result.login, result.password);
-        mainForm.reset();
+        if (mainForm) mainForm.reset();
         return true;
       } else {
         if (result.errors) {
           let errorMsg = "";
           for (const [key, value] of Object.entries(result.errors)) {
             errorMsg += `${value}\n`;
-            const field = document.getElementById(key);
+            const field = document.querySelector(`[name="${key}"]`);
             if (field) {
               field.style.borderColor = "#f14d34";
-              let errorSpan = field.parentNode.querySelector(".field-error");
-              if (!errorSpan) {
-                errorSpan = document.createElement("small");
-                errorSpan.className = "field-error error-text";
-                field.parentNode.appendChild(errorSpan);
-              }
-              errorSpan.textContent = value;
             }
           }
           showNotification(errorMsg, "error");
@@ -223,14 +223,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return false;
       }
     } catch (err) {
-      showNotification("Ошибка соединения с сервером", "error");
+      console.error("Fetch error:", err);
+      showNotification("Ошибка соединения. Форма отправлена обычным способом.", "error");
+      // Фоллбек: отправляем форму обычным POST
+      if (mainForm) {
+        mainForm.removeEventListener("submit", handleSubmit);
+        mainForm.submit();
+      }
       return false;
     }
   }
 
   async function submitLogin(login, password) {
     try {
-      const response = await fetch("/login.php", {
+      const response = await fetch(`${BASE_PATH}/login.php`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         credentials: "same-origin",
@@ -262,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
       biography: formData.get("biography") || ""
     };
     try {
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`${BASE_PATH}/api.php?action=update&id=${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         credentials: "same-origin",
@@ -291,12 +297,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Обработчик для формы
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const formData = new FormData(mainForm);
+    await submitForm(formData);
+  }
+
   if (mainForm) {
-    mainForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formData = new FormData(mainForm);
-      await submitForm(formData);
-    });
+    mainForm.addEventListener("submit", handleSubmit);
   }
 
   if (loginForm) {
