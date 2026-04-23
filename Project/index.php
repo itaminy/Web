@@ -399,10 +399,10 @@ if (empty($_SESSION['csrf_token'])) {
                 <h2 class="section-title">Отзывы</h2>
                 <div class="review-card">
                     <div class="review-content">
-                        <p>«Ребята из Drupal-coder — настоящие профессионалы своего дела! Когда наш сайт www.cielparfum.com начал постоянно "вылетать" и тормозить, мы отчаялись найти толкового специалиста. Но команда Drupal-coder не просто починила всё — они полностью преобразили сайт! Сделали редизайн, настроили поиск, меню, провели конкурсы и тесты. Любая мелочь — и они уже на связи. Особенно хочу поблагодарить Алексея за оперативность, Сергея за креативные идеи, Надежду и Романа за то, что всегда на страже порядка. Спасибо за вашу работу! Теперь мы спим спокойно — сайт в надёжных руках.»</p>
+                        <p>«Ребята из Drupal-coder — настоящие профессионалы своего дела! Когда наш сайт www.cielparfum.com начал постоянно "вылетать" и тормозить, мы отчаялись найти толкового специалиста. Но команда Drupal-coder не просто починила всё — они полностью преобразили сайт! Сделали редизайн, настроили поиск, меню, провели конкурсы и тесты. Любая мелочь — и они уже на связи. Особенно хочу поблагодарить Алексея за оперативность, Сергея за креативные идеи, Надежду и Романа за то, что всегда на страже порядка. Спасибо за вашу работу!»</p>
                     </div>
                     <div class="review-author">
-                        <strong>Наталья Сучкова</strong>
+                        <strong>Наталья С.</strong>
                         <span>Руководитель отдела веб-проектов, ГК «СИ ЭЛЬ ПАРФЮМ»</span>
                         <a href="http://www.cielparfum.com/">www.cielparfum.com</a>
                     </div>
@@ -566,7 +566,7 @@ if (empty($_SESSION['csrf_token'])) {
                         <div class="checkbox-group">
                             <input type="checkbox" id="contract" name="contract" value="1" 
                                 <?php echo (($old['contract'] ?? $contract ?? '') == '1') ? 'checked' : ''; ?> required>
-                            <label for="contract">✅ Я ознакомлен(а) с условиями контракта</label>
+                            <label for="contract"> Я ознакомлен(а) с условиями контракта</label>
                         </div>
                         <?php if (isset($errors['contract'])): ?>
                             <small class="error-text"><?php echo e($errors['contract']); ?></small>
@@ -577,7 +577,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </form>
                 
                 <div class="form-contacts" style="margin-top: 30px; text-align: center;">
-                    <div class="contact-item"><strong>📞 8 800 222-26-73</strong></div>
+                    <div class="contact-item"><strong>📞 8 999 999-99-99</strong></div>
                     <div class="contact-item"><strong>✉️ info@drupal-coder.ru</strong></div>
                     <div style="margin-top: 15px;">
                         <a href="login.php" style="color: var(--primary-color); text-decoration: none;">🔐 Уже зарегистрированы? Войдите</a>
