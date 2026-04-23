@@ -1,6 +1,17 @@
 <?php
 session_start();
 
+// CORS заголовки для AJAX
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Обработка preflight запроса OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 ini_set('display_errors', 0);
@@ -220,9 +231,13 @@ if ($method === 'POST' && !$user_id) {
     }
 }
 
-// PUT /api/users/{id}
-if ($method === 'PUT' && $user_id) {
-    if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $user_id) {
+// PUT /api/users/{id} или /api.php?action=update&id={id}
+if ($method === 'PUT' && ($user_id || isset($_GET['id']))) {
+    $put_id = $user_id ?? (isset($_GET['id']) ? (int)$_GET['id'] : null);
+    if (!$put_id) {
+        sendResponse(['error' => 'User ID required'], 400, $format);
+    }
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $put_id) {
         sendResponse(['error' => 'Unauthorized'], 401, $format);
     }
     
@@ -242,11 +257,11 @@ if ($method === 'PUT' && $user_id) {
     try {
         $pdo->beginTransaction();
         $stmt = $pdo->prepare("UPDATE users SET full_name = ?, phone = ?, email = ?, birth_date = ?, gender = ?, biography = ? WHERE id = ?");
-        $stmt->execute([$input_data['full_name'], $input_data['phone'], $input_data['email'], $input_data['birth_date'], $input_data['gender'], $input_data['biography'] ?? null, $user_id]);
-        $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?")->execute([$user_id]);
+        $stmt->execute([$input_data['full_name'], $input_data['phone'], $input_data['email'], $input_data['birth_date'], $input_data['gender'], $input_data['biography'] ?? null, $put_id]);
+        $pdo->prepare("DELETE FROM user_languages WHERE user_id = ?")->execute([$put_id]);
         $lang_stmt = $pdo->prepare("INSERT INTO user_languages (user_id, language_id) SELECT ?, id FROM programming_languages WHERE name = ?");
         foreach ($input_data['languages'] as $language) {
-            $lang_stmt->execute([$user_id, $language]);
+            $lang_stmt->execute([$put_id, $language]);
         }
         $pdo->commit();
         sendResponse(['success' => true, 'message' => 'Data updated successfully'], 200, $format);
@@ -256,18 +271,22 @@ if ($method === 'PUT' && $user_id) {
     }
 }
 
-// GET /api/users/{id}
-if ($method === 'GET' && $user_id) {
-    if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $user_id) {
+// GET /api/users/{id} или /api.php?action=get&id={id}
+if ($method === 'GET' && ($user_id || isset($_GET['id']))) {
+    $get_id = $user_id ?? (isset($_GET['id']) ? (int)$_GET['id'] : null);
+    if (!$get_id) {
+        sendResponse(['error' => 'User ID required'], 400, $format);
+    }
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $get_id) {
         sendResponse(['error' => 'Unauthorized'], 401, $format);
     }
     try {
         $stmt = $pdo->prepare("SELECT id, login, full_name, phone, email, birth_date, gender, biography FROM users WHERE id = ?");
-        $stmt->execute([$user_id]);
+        $stmt->execute([$get_id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user) sendResponse(['error' => 'User not found'], 404, $format);
         $lang_stmt = $pdo->prepare("SELECT pl.name FROM programming_languages pl JOIN user_languages ul ON pl.id = ul.language_id WHERE ul.user_id = ?");
-        $lang_stmt->execute([$user_id]);
+        $lang_stmt->execute([$get_id]);
         $user['languages'] = $lang_stmt->fetchAll(PDO::FETCH_COLUMN);
         sendResponse($user, 200, $format);
     } catch (PDOException $e) {
