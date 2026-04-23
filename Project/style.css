@@ -795,3 +795,92 @@ body.menu-open {
   background: var(--primary-color);
   border-radius: 4px;
 }
+/* Исправление для отзыва */
+.reviews {
+    padding: 100px 0;
+    background: var(--bg-white);
+    overflow-x: hidden;
+}
+
+.review-card {
+    background: white;
+    padding: 50px 60px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.review-card:before {
+    content: "“";
+    font-size: 120px;
+    color: var(--primary-color);
+    opacity: 0.2;
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    font-family: Georgia, serif;
+    pointer-events: none;
+}
+
+.review-content {
+    position: relative;
+    z-index: 1;
+}
+
+.review-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+    font-style: normal;
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.review-author {
+    border-top: 2px solid var(--border-color);
+    padding-top: 25px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.review-author strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.review-author span {
+    display: block;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.review-author a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.review-author a:hover {
+    text-decoration: underline;
+}
+
+/* Адаптивность для отзыва */
+@media (max-width: 768px) {
+    .review-card {
+        padding: 30px 25px;
+    }
+    .review-card:before {
+        font-size: 70px;
+        top: 15px;
+        left: 20px;
+    }
+    .review-content p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+}
