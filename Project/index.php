@@ -480,7 +480,7 @@ if (empty($_SESSION['csrf_token'])) {
                     </div>
                 <?php endif; ?>
 
-                <form action="validate.php" method="POST" class="anketa-form">
+                <form action="validate.php" method="POST" class="anketa-form" id="mainForm">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     
                     <!-- ФИО -->
