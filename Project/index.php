@@ -624,5 +624,39 @@ if (empty($_SESSION['csrf_token'])) {
         setcookie('form_old', '', time() - 3600, '/', '', true, true);
     }
     ?>
+        <!-- Модальное окно для логина/пароля -->
+    <div id="credentialsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; max-width:450px; width:90%; position:relative;">
+            <span onclick="document.getElementById('credentialsModal').style.display='none'" style="position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#999;">&times;</span>
+            <h3 style="margin-bottom:20px;">🎉 Регистрация успешна!</h3>
+            <div id="credentialsContent"></div>
+            <button onclick="document.getElementById('credentialsModal').style.display='none'" class="btn-primary" style="width:100%; margin-top:20px;">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+    // Функция для показа модального окна с логином и паролем
+    window.showCredentialsModal = function(login, password) {
+        const modal = document.getElementById('credentialsModal');
+        const content = document.getElementById('credentialsContent');
+        if (modal && content) {
+            content.innerHTML = `
+                <div style="background:#e3f2fd; border-left:4px solid #2196f3; padding:15px; border-radius:8px; margin:15px 0;">
+                    <p><strong>✅ Ваши данные для входа:</strong></p>
+                    <p>🔐 Логин: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${login}</code></p>
+                    <p>🔐 Пароль: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${password}</code></p>
+                    <p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        } else {
+            alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
+        }
+    };
+
+    function closeCredentialsModal() {
+        document.getElementById('credentialsModal').style.display = 'none';
+    }
+    </script>
 </body>
 </html>
