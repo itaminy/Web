@@ -104,7 +104,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showCredentialsModal(login, password) {
-    alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
+    const modal = document.getElementById("credentialsModal");
+    const content = document.getElementById("credentialsContent");
+    if (modal && content) {
+        content.innerHTML = `
+            <div style="background:#e3f2fd; border-left:4px solid #2196f3; padding:15px; border-radius:8px; margin:15px 0;">
+                <p><strong>✅ Ваши данные для входа:</strong></p>
+                <p>🔐 Логин: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${login}</code></p>
+                <p>🔐 Пароль: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${password}</code></p>
+                <p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    } else {
+        alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
+    }
 }
 
   function closeCredentialsModal() { const modal = document.getElementById("credentialsModal"); if (modal) modal.classList.remove("active"); }
