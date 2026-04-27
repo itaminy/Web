@@ -885,7 +885,11 @@ body.menu-open {
     }
 }
 
-/* Модальное окно для логина/пароля */
+
+
+
+
+/* Модальное окно */
 .form-modal {
     display: none;
     position: fixed;
@@ -898,11 +902,9 @@ body.menu-open {
     justify-content: center;
     align-items: center;
 }
-
 .form-modal.active {
     display: flex;
 }
-
 .form-modal-content {
     background: white;
     padding: 30px;
@@ -910,23 +912,7 @@ body.menu-open {
     max-width: 450px;
     width: 90%;
     position: relative;
-    animation: fadeInUp 0.3s ease;
 }
-
-.form-modal-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #999;
-    transition: var(--transition);
-}
-
-.form-modal-close:hover {
-    color: var(--primary-color);
-}
-
 .login-credentials {
     background: #e3f2fd;
     border-left: 4px solid #2196f3;
@@ -934,11 +920,8 @@ body.menu-open {
     margin: 15px 0;
     border-radius: 8px;
 }
-
 .login-credentials code {
     background: #fff;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 1.1em;
-    font-weight: bold;
 }
