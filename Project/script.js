@@ -10,8 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let currentUserId = null;
   let isLoggedIn = false;
-
-  // Базовый путь (если сайт в подпапке)
   const BASE_PATH = "/Web/Project";
 
   function initMobileMenu() {
@@ -107,19 +105,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("credentialsModal");
     const content = document.getElementById("credentialsContent");
     if (modal && content) {
-        content.innerHTML = `
-            <div style="background:#e3f2fd; border-left:4px solid #2196f3; padding:15px; border-radius:8px; margin:15px 0;">
-                <p><strong>✅ Ваши данные для входа:</strong></p>
-                <p>🔐 Логин: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${login}</code></p>
-                <p>🔐 Пароль: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${password}</code></p>
-                <p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p>
-            </div>
-        `;
-        modal.style.display = 'flex';
+      content.innerHTML = `
+        <div style="background:#e3f2fd; border-left:4px solid #2196f3; padding:15px; border-radius:8px; margin:15px 0;">
+          <p><strong>✅ Ваши данные для входа:</strong></p>
+          <p>🔐 Логин: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${login}</code></p>
+          <p>🔐 Пароль: <code style="background:#fff; padding:4px 8px; border-radius:4px;">${password}</code></p>
+          <p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p>
+        </div>
+      `;
+      modal.style.display = 'flex';
     } else {
-        alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
+      alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
     }
-}
+  }
 
   function closeCredentialsModal() { const modal = document.getElementById("credentialsModal"); if (modal) modal.classList.remove("active"); }
   function showLoginModal() { const modal = document.getElementById("loginModal"); if (modal) modal.classList.add("active"); }
@@ -192,71 +190,70 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function submitForm(formData) {
-    // Правильный сбор выбранных языков из select
     const languagesSelect = document.getElementById("languages");
     const selectedLanguages = [];
     if (languagesSelect) {
-        for (let i = 0; i < languagesSelect.options.length; i++) {
-            if (languagesSelect.options[i].selected) {
-                selectedLanguages.push(languagesSelect.options[i].value);
-            }
+      for (let i = 0; i < languagesSelect.options.length; i++) {
+        if (languagesSelect.options[i].selected) {
+          selectedLanguages.push(languagesSelect.options[i].value);
         }
+      }
     }
     
     const formObject = {
-        full_name: formData.get("full_name") || document.getElementById("full_name")?.value || "",
-        phone: formData.get("phone") || document.getElementById("phone")?.value || "",
-        email: formData.get("email") || document.getElementById("email")?.value || "",
-        birth_date: formData.get("birth_date") || document.getElementById("birth_date")?.value || "",
-        gender: formData.get("gender") || document.getElementById("gender")?.value || "",
-        languages: selectedLanguages,
-        biography: formData.get("biography") || document.getElementById("biography")?.value || "",
-        contract: (formData.get("contract") || document.getElementById("contract")?.checked) ? "1" : ""
+      full_name: formData.get("full_name") || document.getElementById("full_name")?.value || "",
+      phone: formData.get("phone") || document.getElementById("phone")?.value || "",
+      email: formData.get("email") || document.getElementById("email")?.value || "",
+      birth_date: formData.get("birth_date") || document.getElementById("birth_date")?.value || "",
+      gender: formData.get("gender") || document.getElementById("gender")?.value || "",
+      languages: selectedLanguages,
+      biography: formData.get("biography") || document.getElementById("biography")?.value || "",
+      contract: (formData.get("contract") || document.getElementById("contract")?.checked) ? "1" : ""
     };
     
-    console.log("📤 Отправляемые данные:", formObject);  // Отладка в консоли
+    console.log("📤 Отправляемые данные:", formObject);
     
     try {
-        const response = await fetch(`${BASE_PATH}/api.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            credentials: "same-origin",
-            body: JSON.stringify(formObject)
-        });
-        const result = await response.json();
-        console.log("📥 Ответ сервера:", result);  // Отладка в консоли
-        
-        if (response.ok && result.success) {
-            showNotification("Регистрация успешна!", "success");
-            showCredentialsModal(result.login, result.password);
-            if (mainForm) mainForm.reset();
-            return true;
-        } else {
-            if (result.errors) {
-                let errorMsg = "";
-                for (const [key, value] of Object.entries(result.errors)) {
-                    errorMsg += `${value}\n`;
-                    const field = document.getElementById(key);
-                    if (field) {
-                        field.style.borderColor = "#f14d34";
-                    }
-                }
-                showNotification(errorMsg, "error");
-            } else {
-                showNotification(result.error || "Ошибка регистрации", "error");
+      const response = await fetch(`${BASE_PATH}/api.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(formObject)
+      });
+      const result = await response.json();
+      console.log("📥 Ответ сервера:", result);
+      
+      if (response.ok && result.success) {
+        showNotification("Регистрация успешна!", "success");
+        showCredentialsModal(result.login, result.password);
+        if (mainForm) mainForm.reset();
+        return true;
+      } else {
+        if (result.errors) {
+          let errorMsg = "";
+          for (const [key, value] of Object.entries(result.errors)) {
+            errorMsg += `${value}\n`;
+            const field = document.getElementById(key);
+            if (field) {
+              field.style.borderColor = "#f14d34";
             }
-            return false;
-        }
-    } catch (err) {
-        console.error("Fetch error:", err);
-        showNotification("Ошибка соединения. Форма отправлена обычным способом.", "error");
-        if (mainForm) {
-            mainForm.removeEventListener("submit", handleSubmit);
-            mainForm.submit();
+          }
+          showNotification(errorMsg, "error");
+        } else {
+          showNotification(result.error || "Ошибка регистрации", "error");
         }
         return false;
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      showNotification("Ошибка соединения. Форма отправлена обычным способом.", "error");
+      if (mainForm) {
+        mainForm.removeEventListener("submit", handleSubmit);
+        mainForm.submit();
+      }
+      return false;
     }
-}
+  }
 
   async function submitLogin(login, password) {
     try {
@@ -321,7 +318,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Обработчик для формы
   async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(mainForm);
