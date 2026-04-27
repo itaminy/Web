@@ -104,13 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showCredentialsModal(login, password) {
-    const modal = document.getElementById("credentialsModal");
-    const content = document.getElementById("credentialsContent");
-    if (modal && content) {
-      content.innerHTML = `<div class="login-credentials"><p><strong>✅ Вы успешно зарегистрированы!</strong></p><p>🔐 <strong>Ваши данные для входа:</strong></p><p>Логин: <code>${login}</code></p><p>Пароль: <code>${password}</code></p><p><small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small></p></div>`;
-      modal.classList.add("active");
-    }
-  }
+    alert('✅ Регистрация успешна!\nЛогин: ' + login + '\nПароль: ' + password);
+}
 
   function closeCredentialsModal() { const modal = document.getElementById("credentialsModal"); if (modal) modal.classList.remove("active"); }
   function showLoginModal() { const modal = document.getElementById("loginModal"); if (modal) modal.classList.add("active"); }
