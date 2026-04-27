@@ -884,3 +884,61 @@ body.menu-open {
         line-height: 1.6;
     }
 }
+
+/* Модальное окно для логина/пароля */
+.form-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10001;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-modal.active {
+    display: flex;
+}
+
+.form-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 90%;
+    position: relative;
+    animation: fadeInUp 0.3s ease;
+}
+
+.form-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    transition: var(--transition);
+}
+
+.form-modal-close:hover {
+    color: var(--primary-color);
+}
+
+.login-credentials {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+}
+
+.login-credentials code {
+    background: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
