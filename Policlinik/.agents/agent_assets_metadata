@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Pcmf7BrsUgatmOJBQNfxd"
+uri = "file://artifacts/polyclinic/src/assets/images/dashboard-hero.jpg"
+type = "image"
+title = "modern bright medical clinic reception desk with friendly staff"
+
+[[outputs]]
+id = "uE4B_nao6CEO638-qoqhr"
+uri = "file://artifacts/polyclinic/src/assets/images/empty-state.jpg"
+type = "image"
+title = "clean medical clipboard stethoscope"
+
+[[outputs]]
+id = "30IogXa0Pj_RL6vTqH-jx"
+uri = "file://artifacts/polyclinic/src/assets/images/doctor-avatar.jpg"
+type = "image"
+title = "professional doctor portrait"
