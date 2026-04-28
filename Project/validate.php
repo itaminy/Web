@@ -237,7 +237,7 @@ try {
         'expires' => time() + 31536000,
         'path' => '/',
         'domain' => '',
-        'secure' => true,
+        'secure' => false,
         'httponly' => true,
         'samesite' => 'Strict'
     ];
