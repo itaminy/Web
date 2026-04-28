@@ -460,19 +460,24 @@ if (empty($_SESSION['csrf_token'])) {
                     <div class="success-message"><?php echo e($_SESSION['success']); unset($_SESSION['success']); ?></div>
                 <?php endif; ?>
                 
-                <?php if (isset($_SESSION['new_user_login']) && isset($_SESSION['new_user_password'])): ?>
+               <?php
+                $new_login = $_SESSION['new_user_login'] ?? null;
+                $new_password = $_SESSION['new_user_password'] ?? null;
+
+                if ($new_login && $new_password):
+                ?>
                     <div class="login-info">
                         <strong>🎉 Регистрация успешна!</strong><br><br>
                         🔐 <strong>Ваши данные для входа:</strong><br>
-                        Логин: <code><?php echo e($_SESSION['new_user_login']); ?></code><br>
-                        Пароль: <code><?php echo e($_SESSION['new_user_password']); ?></code><br><br>
+                        Логин: <code><?php echo e($new_login); ?></code><br>
+                        Пароль: <code><?php echo e($new_password); ?></code><br><br>
                         <small>⚠️ Сохраните эти данные! Они понадобятся для входа в личный кабинет.</small>
-                    </div>
-                    <?php 
+                   </div>
+                <?php
                     unset($_SESSION['new_user_login']);
                     unset($_SESSION['new_user_password']);
-                    ?>
-                <?php endif; ?>
+                endif;
+            ?>
                 
                 <?php if (!empty($errors)): ?>
                     <div class="error-message">
