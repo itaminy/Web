@@ -1,0 +1,583 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Polyclinic management API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: doctors
+  - name: patients
+  - name: diseases
+  - name: visits
+  - name: stats
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /doctors:
+    get:
+      operationId: listDoctors
+      tags: [doctors]
+      summary: List doctors
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: specialty
+          schema: { type: string }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Doctor" }
+    post:
+      operationId: createDoctor
+      tags: [doctors]
+      summary: Create doctor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DoctorInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Doctor" }
+  /doctors/{id}:
+    get:
+      operationId: getDoctor
+      tags: [doctors]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Doctor
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Doctor" }
+    put:
+      operationId: updateDoctor
+      tags: [doctors]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DoctorInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Doctor" }
+    delete:
+      operationId: deleteDoctor
+      tags: [doctors]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /patients:
+    get:
+      operationId: listPatients
+      tags: [patients]
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: gender
+          schema: { type: string, enum: [male, female] }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Patient" }
+    post:
+      operationId: createPatient
+      tags: [patients]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatientInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Patient" }
+  /patients/{id}:
+    get:
+      operationId: getPatient
+      tags: [patients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Patient
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Patient" }
+    put:
+      operationId: updatePatient
+      tags: [patients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatientInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Patient" }
+    delete:
+      operationId: deletePatient
+      tags: [patients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /diseases:
+    get:
+      operationId: listDiseases
+      tags: [diseases]
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: severity
+          schema: { type: string, enum: [mild, moderate, severe] }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Disease" }
+    post:
+      operationId: createDisease
+      tags: [diseases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiseaseInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Disease" }
+  /diseases/{id}:
+    get:
+      operationId: getDisease
+      tags: [diseases]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Disease
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Disease" }
+    put:
+      operationId: updateDisease
+      tags: [diseases]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiseaseInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Disease" }
+    delete:
+      operationId: deleteDisease
+      tags: [diseases]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /visits:
+    get:
+      operationId: listVisits
+      tags: [visits]
+      parameters:
+        - in: query
+          name: doctorId
+          schema: { type: integer }
+        - in: query
+          name: patientId
+          schema: { type: integer }
+        - in: query
+          name: diseaseId
+          schema: { type: integer }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date }
+        - in: query
+          name: status
+          schema: { type: string, enum: [scheduled, completed, cancelled] }
+      responses:
+        "200":
+          description: List of visits with joined info
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VisitDetailed" }
+    post:
+      operationId: createVisit
+      tags: [visits]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisitInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Visit" }
+  /visits/{id}:
+    get:
+      operationId: getVisit
+      tags: [visits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Visit
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisitDetailed" }
+    put:
+      operationId: updateVisit
+      tags: [visits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisitInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Visit" }
+    delete:
+      operationId: deleteVisit
+      tags: [visits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/overview:
+    get:
+      operationId: getStatsOverview
+      tags: [stats]
+      summary: Dashboard summary
+      responses:
+        "200":
+          description: Aggregated counts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StatsOverview" }
+  /stats/visits-by-day:
+    get:
+      operationId: getVisitsByDay
+      tags: [stats]
+      summary: Visits grouped by day for the last N days
+      parameters:
+        - in: query
+          name: days
+          schema: { type: integer, default: 14 }
+      responses:
+        "200":
+          description: Series
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VisitsByDay" }
+  /stats/top-diseases:
+    get:
+      operationId: getTopDiseases
+      tags: [stats]
+      summary: Top diseases by visit count
+      responses:
+        "200":
+          description: Top diseases
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TopDisease" }
+  /stats/doctor-load:
+    get:
+      operationId: getDoctorLoad
+      tags: [stats]
+      summary: Visits per doctor
+      responses:
+        "200":
+          description: Doctor load
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DoctorLoad" }
+  /stats/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [stats]
+      summary: Recent visits feed
+      responses:
+        "200":
+          description: Recent visits
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VisitDetailed" }
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+
+    Doctor:
+      type: object
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        specialty: { type: string }
+        cabinet: { type: string }
+        phone: { type: string }
+        experienceYears: { type: integer }
+        photoUrl: { type: string, nullable: true }
+        bio: { type: string, nullable: true }
+        createdAt: { type: string }
+      required: [id, fullName, specialty, cabinet, phone, experienceYears, createdAt]
+    DoctorInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 1 }
+        specialty: { type: string, minLength: 1 }
+        cabinet: { type: string, minLength: 1 }
+        phone: { type: string, minLength: 1 }
+        experienceYears: { type: integer, minimum: 0 }
+        photoUrl: { type: string, nullable: true }
+        bio: { type: string, nullable: true }
+      required: [fullName, specialty, cabinet, phone, experienceYears]
+
+    Patient:
+      type: object
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        gender: { type: string, enum: [male, female] }
+        birthDate: { type: string, format: date }
+        phone: { type: string }
+        address: { type: string }
+        insuranceNumber: { type: string }
+        createdAt: { type: string }
+      required: [id, fullName, gender, birthDate, phone, address, insuranceNumber, createdAt]
+    PatientInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 1 }
+        gender: { type: string, enum: [male, female] }
+        birthDate: { type: string, format: date }
+        phone: { type: string, minLength: 1 }
+        address: { type: string, minLength: 1 }
+        insuranceNumber: { type: string, minLength: 1 }
+      required: [fullName, gender, birthDate, phone, address, insuranceNumber]
+
+    Disease:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        code: { type: string }
+        category: { type: string }
+        severity: { type: string, enum: [mild, moderate, severe] }
+        description: { type: string }
+        contagious: { type: boolean }
+        createdAt: { type: string }
+      required: [id, name, code, category, severity, description, contagious, createdAt]
+    DiseaseInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        code: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        severity: { type: string, enum: [mild, moderate, severe] }
+        description: { type: string }
+        contagious: { type: boolean }
+      required: [name, code, category, severity, description, contagious]
+
+    Visit:
+      type: object
+      properties:
+        id: { type: integer }
+        doctorId: { type: integer }
+        patientId: { type: integer }
+        diseaseId: { type: integer, nullable: true }
+        visitDate: { type: string, format: date-time }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+        complaints: { type: string }
+        prescription: { type: string, nullable: true }
+        createdAt: { type: string }
+      required: [id, doctorId, patientId, visitDate, status, complaints, createdAt]
+    VisitInput:
+      type: object
+      properties:
+        doctorId: { type: integer }
+        patientId: { type: integer }
+        diseaseId: { type: integer, nullable: true }
+        visitDate: { type: string, format: date-time }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+        complaints: { type: string }
+        prescription: { type: string, nullable: true }
+      required: [doctorId, patientId, visitDate, status, complaints]
+    VisitDetailed:
+      type: object
+      properties:
+        id: { type: integer }
+        doctorId: { type: integer }
+        patientId: { type: integer }
+        diseaseId: { type: integer, nullable: true }
+        visitDate: { type: string, format: date-time }
+        status: { type: string, enum: [scheduled, completed, cancelled] }
+        complaints: { type: string }
+        prescription: { type: string, nullable: true }
+        createdAt: { type: string }
+        doctorName: { type: string }
+        doctorSpecialty: { type: string }
+        patientName: { type: string }
+        diseaseName: { type: string, nullable: true }
+      required: [id, doctorId, patientId, visitDate, status, complaints, createdAt, doctorName, doctorSpecialty, patientName]
+
+    StatsOverview:
+      type: object
+      properties:
+        totalDoctors: { type: integer }
+        totalPatients: { type: integer }
+        totalDiseases: { type: integer }
+        totalVisits: { type: integer }
+        visitsToday: { type: integer }
+        visitsThisWeek: { type: integer }
+        scheduledVisits: { type: integer }
+        completedVisits: { type: integer }
+      required: [totalDoctors, totalPatients, totalDiseases, totalVisits, visitsToday, visitsThisWeek, scheduledVisits, completedVisits]
+    VisitsByDay:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        count: { type: integer }
+      required: [date, count]
+    TopDisease:
+      type: object
+      properties:
+        diseaseId: { type: integer }
+        diseaseName: { type: string }
+        category: { type: string }
+        count: { type: integer }
+      required: [diseaseId, diseaseName, category, count]
+    DoctorLoad:
+      type: object
+      properties:
+        doctorId: { type: integer }
+        doctorName: { type: string }
+        specialty: { type: string }
+        count: { type: integer }
+      required: [doctorId, doctorName, specialty, count]
