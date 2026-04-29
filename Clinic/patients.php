@@ -1,11 +1,9 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 
 $config_file = '/home/u82382/www/Web/db_config.php';
 if (!file_exists($config_file)) {
-    die('Config error');
+    die('Ошибка конфигурации БД');
 }
 require_once $config_file;
 
@@ -17,7 +15,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
-    die('DB error: ' . $e->getMessage());
+    die('Ошибка подключения к БД');
 }
 
 $stmt = $pdo->query("SELECT * FROM patients ORDER BY id DESC");
@@ -27,32 +25,40 @@ $page_title = 'Пациенты';
 include __DIR__ . '/includes/admin-header.php';
 ?>
 
-<div class="card">
-    <h2>База пациентов</h2>
-    <p>Всего записей: <?= count($PATIENTS) ?></p>
-    
-    <table border="1" cellpadding="8" style="width:100%; border-collapse:collapse;">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>ФИО</th>
-                <th>Дата рождения</th>
-                <th>Пол</th>
-                <th>Телефон</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($PATIENTS as $p): ?>
-            <tr>
-                <td><?= $p['id'] ?></td>
-                <td><?= htmlspecialchars($p['name']) ?></td>
-                <td><?= $p['birth'] ?></td>
-                <td><?= $p['gender'] ?></td>
-                <td><?= $p['phone'] ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+<div class="card reveal">
+    <div class="card-head">
+        <h2>База пациентов</h2>
+        <div class="card-sub">Всего записей: <?= count($PATIENTS) ?></div>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Дата рождения</th>
+                    <th>Пол</th>
+                    <th>Телефон</th>
+                    <th>Полис</th>
+                    <th>Адрес</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($PATIENTS as $p): ?>
+                <tr>
+                    <td><?= $p['id'] ?></td>
+                    <td><strong><?= htmlspecialchars($p['name']) ?></strong></td>
+                    <td><?= date('d.m.Y', strtotime($p['birth'])) ?></td>
+                    <td><?= $p['gender'] === 'муж.' ? '👨 Мужской' : '👩 Женский' ?></td>
+                    <td><?= htmlspecialchars($p['phone']) ?></td>
+                    <td><?= htmlspecialchars($p['policy']) ?></td>
+                    <td><?= htmlspecialchars($p['address']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <?php include __DIR__ . '/includes/admin-footer.php'; ?>
