@@ -1,5 +1,37 @@
 <?php
-require __DIR__ . '/includes/sample-data.php';
+session_start();
+
+// Подключение к БД
+$config_file = '/home/u82382/www/Web/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации БД');
+}
+require_once $config_file;
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (PDOException $e) {
+    die('Ошибка подключения к БД');
+}
+
+// Получаем болезни из БД
+$stmt = $pdo->query("SELECT * FROM diseases ORDER BY id");
+$DISEASES = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function severity_label($s) {
+    return match($s) {
+        'mild' => 'Лёгкая',
+        'moderate' => 'Средняя',
+        'severe' => 'Тяжёлая',
+        default => $s
+    };
+}
+
 $page_title = 'Виды болезней';
 include __DIR__ . '/includes/admin-header.php';
 ?>
@@ -43,23 +75,26 @@ include __DIR__ . '/includes/admin-header.php';
             </thead>
             <tbody>
                 <?php foreach ($DISEASES as $d):
-                    $sev = $d['severity'];
-                    $sev_class = $sev === 'severe' ? 'badge-danger' : ($sev === 'moderate' ? 'badge-warning' : 'badge-success');
+                    $sev_class = match($d['severity']) {
+                        'severe' => 'badge-danger',
+                        'moderate' => 'badge-warning',
+                        default => 'badge-success'
+                    };
                 ?>
                 <tr>
                     <td class="num-col"><?= (int)$d['id'] ?></td>
                     <td style="font-weight: 600;"><?= htmlspecialchars($d['name']) ?></td>
-                    <td style="font-family: monospace; color: var(--accent);"><?= htmlspecialchars($d['icd10']) ?></td>
-                    <td style="color: var(--text-muted); font-size: 13px; max-width: 360px;"><?= htmlspecialchars($d['description']) ?></td>
-                    <td data-col="severity" data-value="<?= htmlspecialchars($sev) ?>">
-                        <span class="badge <?= $sev_class ?>"><span class="dot"></span><?= severity_label($sev) ?></span>
+                    <td style="font-family: monospace;"><?= htmlspecialchars($d['icd10']) ?></td>
+                    <td style="color: var(--text-muted); font-size: 13px;"><?= htmlspecialchars($d['description']) ?></td>
+                    <td data-col="severity" data-value="<?= htmlspecialchars($d['severity']) ?>">
+                        <span class="badge <?= $sev_class ?>"><?= severity_label($d['severity']) ?></span>
                     </td>
                     <td>
                         <div class="row-actions">
                             <button class="icon-btn" title="Редактировать">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
                             </button>
-                            <button class="icon-btn danger" title="Удалить" data-confirm="Удалить эту болезнь из справочника?">
+                            <button class="icon-btn danger" title="Удалить">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
                             </button>
                         </div>
