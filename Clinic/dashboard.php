@@ -1,10 +1,9 @@
 <?php
 session_start();
 
-// Подключение к БД
 $config_file = '/home/u82382/www/Web/db_config.php';
 if (!file_exists($config_file)) {
-    die('Ошибка конфигурации БД');
+    die('Config error');
 }
 require_once $config_file;
 
@@ -16,10 +15,10 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
-    die('Ошибка подключения к БД');
+    die('DB error: ' . $e->getMessage());
 }
 
-// Статистика из БД
+// Статистика
 $doctors_count = $pdo->query("SELECT COUNT(*) FROM doctors")->fetchColumn();
 $patients_count = $pdo->query("SELECT COUNT(*) FROM patients")->fetchColumn();
 $diseases_count = $pdo->query("SELECT COUNT(*) FROM diseases")->fetchColumn();
@@ -27,16 +26,7 @@ $visits_total = $pdo->query("SELECT COUNT(*) FROM visits")->fetchColumn();
 $visits_today = $pdo->query("SELECT COUNT(*) FROM visits WHERE DATE(visit_date) = CURDATE()")->fetchColumn();
 $apps_new = $pdo->query("SELECT COUNT(*) FROM applications WHERE status = 'new'")->fetchColumn();
 
-$STATS = [
-    'doctors' => $doctors_count,
-    'patients' => $patients_count,
-    'diseases' => $diseases_count,
-    'visits_total' => $visits_total,
-    'visits_today' => $visits_today,
-    'apps_new' => $apps_new,
-];
-
-// Приёмы по врачам для графика
+// Приёмы по врачам
 $VISITS_BY_DOCTOR = $pdo->query("
     SELECT d.name, COUNT(v.id) as count 
     FROM visits v 
@@ -45,7 +35,7 @@ $VISITS_BY_DOCTOR = $pdo->query("
     ORDER BY count DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Приёмы по болезням для графика
+// Приёмы по болезням
 $VISITS_BY_DISEASE = $pdo->query("
     SELECT dis.name, COUNT(v.id) as count 
     FROM visits v 
@@ -65,7 +55,12 @@ $recent_visits = $pdo->query("
     LIMIT 6
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-$max_doctor = max(array_column($VISITS_BY_DOCTOR, 'count')) ?: 1;
+// Безопасное вычисление max
+$max_doctor = 1;
+if (!empty($VISITS_BY_DOCTOR)) {
+    $max_doctor = max(array_column($VISITS_BY_DOCTOR, 'count'));
+}
+
 $colors = ['#14b8a6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981'];
 $donut_data = [];
 foreach ($VISITS_BY_DISEASE as $i => $d) {
@@ -93,7 +88,7 @@ include __DIR__ . '/includes/admin-header.php';
             <span class="kpi-label">Новых заявок</span>
             <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
         </div>
-        <div class="kpi-value" data-count="<?= (int)$STATS['apps_new'] ?>">0</div>
+        <div class="kpi-value" data-count="<?= (int)$apps_new ?>">0</div>
         <div class="kpi-sub">Требуют обработки</div>
     </div>
     <div class="kpi">
@@ -101,15 +96,15 @@ include __DIR__ . '/includes/admin-header.php';
             <span class="kpi-label">Приёмов сегодня</span>
             <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
         </div>
-        <div class="kpi-value" data-count="<?= (int)$STATS['visits_today'] ?>">0</div>
-        <div class="kpi-sub">Всего: <?= (int)$STATS['visits_total'] ?></div>
+        <div class="kpi-value" data-count="<?= (int)$visits_today ?>">0</div>
+        <div class="kpi-sub">Всего: <?= (int)$visits_total ?></div>
     </div>
     <div class="kpi">
         <div class="kpi-head">
             <span class="kpi-label">Пациентов</span>
             <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
         </div>
-        <div class="kpi-value" data-count="<?= (int)$STATS['patients'] ?>">0</div>
+        <div class="kpi-value" data-count="<?= (int)$patients_count ?>">0</div>
         <div class="kpi-sub">Зарегистрировано в системе</div>
     </div>
     <div class="kpi kpi-accent">
@@ -117,7 +112,7 @@ include __DIR__ . '/includes/admin-header.php';
             <span class="kpi-label">Врачей</span>
             <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></div>
         </div>
-        <div class="kpi-value" data-count="<?= (int)$STATS['doctors'] ?>">0</div>
+        <div class="kpi-value" data-count="<?= (int)$doctors_count ?>">0</div>
         <div class="kpi-sub">В штате клиники</div>
     </div>
 </div>
@@ -131,13 +126,16 @@ include __DIR__ . '/includes/admin-header.php';
             </div>
         </div>
         <div class="bars">
-            <?php foreach ($VISITS_BY_DOCTOR as $r): $pct = round($r['count'] / $max_doctor * 100); ?>
+            <?php foreach ($VISITS_BY_DOCTOR as $r): $pct = $max_doctor > 0 ? round($r['count'] / $max_doctor * 100) : 0; ?>
             <div class="bar-row">
                 <span class="label"><?= htmlspecialchars($r['name']) ?></span>
                 <div class="track"><div class="fill" data-width="<?= $pct ?>%"></div></div>
                 <span class="val"><?= (int)$r['count'] ?></span>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($VISITS_BY_DOCTOR)): ?>
+            <div class="bar-row"><span colspan="3">Нет данных о приёмах</span></div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -149,6 +147,7 @@ include __DIR__ . '/includes/admin-header.php';
             </div>
         </div>
         <div class="donut-wrap">
+            <?php if (!empty($donut_data)): ?>
             <svg class="donut" viewBox="0 0 200 200" data-values='<?= htmlspecialchars(json_encode($donut_data), ENT_QUOTES) ?>'></svg>
             <div class="donut-legend">
                 <?php foreach ($donut_data as $d): ?>
@@ -159,6 +158,9 @@ include __DIR__ . '/includes/admin-header.php';
                 </div>
                 <?php endforeach; ?>
             </div>
+            <?php else: ?>
+            <p>Нет данных о заболеваниях</p>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -195,9 +197,12 @@ include __DIR__ . '/includes/admin-header.php';
                     <td><?= htmlspecialchars($v['patient_name'] ?? '—') ?></td>
                     <td><?= htmlspecialchars($v['doctor_name'] ?? '—') ?></td>
                     <td><?= htmlspecialchars($v['disease_name'] ?? '—') ?></td>
-                    <td><span class="badge <?= $cls ?>"><?= status_label($v['status']) ?></span></table>
+                    <td><span class="badge <?= $cls ?>"><?= status_label($v['status']) ?></span></td>
                 </tr>
                 <?php endforeach; ?>
+                <?php if (empty($recent_visits)): ?>
+                <tr><td colspan="5">Нет записей о приёмах</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
