@@ -1,14 +1,90 @@
 <?php
-require __DIR__ . '/includes/sample-data.php';
-$page_title = 'Панель управления';
-include __DIR__ . '/includes/admin-header.php';
+session_start();
+
+// Подключение к БД
+$config_file = '/home/u82382/www/Web/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации БД');
+}
+require_once $config_file;
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (PDOException $e) {
+    die('Ошибка подключения к БД');
+}
+
+// Статистика из БД
+$doctors_count = $pdo->query("SELECT COUNT(*) FROM doctors")->fetchColumn();
+$patients_count = $pdo->query("SELECT COUNT(*) FROM patients")->fetchColumn();
+$diseases_count = $pdo->query("SELECT COUNT(*) FROM diseases")->fetchColumn();
+$visits_total = $pdo->query("SELECT COUNT(*) FROM visits")->fetchColumn();
+$visits_today = $pdo->query("SELECT COUNT(*) FROM visits WHERE DATE(visit_date) = CURDATE()")->fetchColumn();
+$apps_new = $pdo->query("SELECT COUNT(*) FROM applications WHERE status = 'new'")->fetchColumn();
+
+$STATS = [
+    'doctors' => $doctors_count,
+    'patients' => $patients_count,
+    'diseases' => $diseases_count,
+    'visits_total' => $visits_total,
+    'visits_today' => $visits_today,
+    'apps_new' => $apps_new,
+];
+
+// Приёмы по врачам для графика
+$VISITS_BY_DOCTOR = $pdo->query("
+    SELECT d.name, COUNT(v.id) as count 
+    FROM visits v 
+    JOIN doctors d ON v.doctor_id = d.id 
+    GROUP BY d.id 
+    ORDER BY count DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// Приёмы по болезням для графика
+$VISITS_BY_DISEASE = $pdo->query("
+    SELECT dis.name, COUNT(v.id) as count 
+    FROM visits v 
+    JOIN diseases dis ON v.disease_id = dis.id 
+    GROUP BY dis.id 
+    ORDER BY count DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// Последние приёмы
+$recent_visits = $pdo->query("
+    SELECT v.*, p.name as patient_name, d.name as doctor_name, dis.name as disease_name
+    FROM visits v
+    LEFT JOIN patients p ON v.patient_id = p.id
+    LEFT JOIN doctors d ON v.doctor_id = d.id
+    LEFT JOIN diseases dis ON v.disease_id = dis.id
+    ORDER BY v.visit_date DESC
+    LIMIT 6
+")->fetchAll(PDO::FETCH_ASSOC);
 
 $max_doctor = max(array_column($VISITS_BY_DOCTOR, 'count')) ?: 1;
 $colors = ['#14b8a6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981'];
 $donut_data = [];
 foreach ($VISITS_BY_DISEASE as $i => $d) {
-    if ($d['count'] > 0) $donut_data[] = ['value' => $d['count'], 'color' => $colors[$i % count($colors)], 'name' => $d['name']];
+    if ($d['count'] > 0) {
+        $donut_data[] = ['value' => $d['count'], 'color' => $colors[$i % count($colors)], 'name' => $d['name']];
+    }
 }
+
+function status_label($s) {
+    return match($s) {
+        'scheduled' => 'Запланирован',
+        'completed' => 'Завершён',
+        'cancelled' => 'Отменён',
+        default => $s
+    };
+}
+
+$page_title = 'Панель управления';
+include __DIR__ . '/includes/admin-header.php';
 ?>
 
 <div class="kpi-grid reveal-stagger">
@@ -107,15 +183,19 @@ foreach ($VISITS_BY_DISEASE as $i => $d) {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach (array_slice($VISITS, 0, 6) as $v):
-                    $cls = $v['status'] === 'completed' ? 'badge-success' : ($v['status'] === 'cancelled' ? 'badge-danger' : 'badge-info');
+                <?php foreach ($recent_visits as $v):
+                    $cls = match($v['status']) {
+                        'completed' => 'badge-success',
+                        'cancelled' => 'badge-danger',
+                        default => 'badge-info'
+                    };
                 ?>
                 <tr>
-                    <td><?= htmlspecialchars($v['date']) ?></td>
-                    <td><?= htmlspecialchars($v['patient']) ?></td>
-                    <td><?= htmlspecialchars($v['doctor']) ?></td>
-                    <td><?= htmlspecialchars($v['disease']) ?></td>
-                    <td><span class="badge <?= $cls ?>"><span class="dot"></span><?= status_label($v['status']) ?></span></td>
+                    <td><?= date('d.m.Y H:i', strtotime($v['visit_date'])) ?></td>
+                    <td><?= htmlspecialchars($v['patient_name'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($v['doctor_name'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($v['disease_name'] ?? '—') ?></td>
+                    <td><span class="badge <?= $cls ?>"><?= status_label($v['status']) ?></span></table>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
