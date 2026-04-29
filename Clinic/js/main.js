@@ -166,24 +166,67 @@
         });
     });
 
-    // ---------- Форма заявки: «отправка» (фронтэнд only) ----------
-    const applyForm = document.getElementById('applyForm');
-    const successCard = document.getElementById('applySuccess');
-    if (applyForm && successCard) {
-        applyForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const submitBtn = applyForm.querySelector('button[type="submit"]');
-            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Отправляем...'; }
-            setTimeout(() => {
+    // ========== ФОРМА ЗАЯВКИ: реальная отправка через API ==========
+const applyForm = document.getElementById('applyForm');
+const successCard = document.getElementById('applySuccess');
+
+if (applyForm && successCard) {
+    applyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = applyForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправляем...';
+        
+        // Собираем данные из формы
+        const formData = new FormData(applyForm);
+        const data = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            email: formData.get('email') || null,
+            date: formData.get('date') || null,
+            doctor_id: formData.get('doctor') || null,
+            symptoms: formData.get('symptoms')
+        };
+        
+        try {
+            const response = await fetch('/Web/Clinic/api.php?action=application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Показываем сообщение об успехе
                 applyForm.style.transition = 'opacity .3s';
                 applyForm.style.opacity = '0';
                 setTimeout(() => {
                     applyForm.style.display = 'none';
                     successCard.style.display = 'block';
                 }, 300);
-            }, 700);
-        });
-    }
+            } else {
+                // Показываем ошибки
+                let errorMsg = 'Ошибка отправки: ';
+                if (result.errors) {
+                    errorMsg += Object.values(result.errors).join(', ');
+                } else {
+                    errorMsg += result.message || 'Неизвестная ошибка';
+                }
+                alert(errorMsg);
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+            alert('Ошибка соединения. Попробуйте позже.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+}
 
     // ---------- «Магнитный» эффект на основные кнопки hero ----------
     document.querySelectorAll('.hero .btn').forEach(btn => {
