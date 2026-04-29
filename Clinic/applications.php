@@ -1,5 +1,43 @@
 <?php
-require __DIR__ . '/includes/sample-data.php';
+session_start();
+
+// Подключение к БД
+$config_file = '/home/u82382/www/Web/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации БД');
+}
+require_once $config_file;
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (PDOException $e) {
+    die('Ошибка подключения к БД');
+}
+
+// Получаем заявки из БД
+$stmt = $pdo->query("
+    SELECT a.*, d.name as doctor_name 
+    FROM applications a
+    LEFT JOIN doctors d ON a.doctor_id = d.id
+    ORDER BY a.id DESC
+");
+$APPLICATIONS = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Функция для статуса
+function status_label($status) {
+    return match($status) {
+        'new' => 'Новая',
+        'approved' => 'Одобрена',
+        'rejected' => 'Отклонена',
+        default => $status
+    };
+}
+
 $page_title = 'Заявки';
 include __DIR__ . '/includes/admin-header.php';
 ?>
@@ -40,36 +78,33 @@ include __DIR__ . '/includes/admin-header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($APPLICATIONS as $a):
-                    $cls = $a['status'] === 'approved' ? 'badge-success'
-                         : ($a['status'] === 'rejected' ? 'badge-danger'
-                         : 'badge-info');
-                    $date_display = ($a['date'] && $a['date'] !== '—') ? date('d.m.Y', strtotime($a['date'])) : '—';
+                <?php foreach ($APPLICATIONS as $a): 
+                    $cls = match($a['status']) {
+                        'approved' => 'badge-success',
+                        'rejected' => 'badge-danger',
+                        default => 'badge-info'
+                    };
+                    $date_display = $a['desired_date'] ? date('d.m.Y', strtotime($a['desired_date'])) : '—';
                 ?>
                 <tr>
                     <td class="num-col"><?= (int)$a['id'] ?></td>
-                    <td>
-                        <div style="font-weight: 600;"><?= htmlspecialchars($date_display) ?></div>
-                    </td>
+                    <td><?= htmlspecialchars($date_display) ?></td>
                     <td style="font-weight: 600;"><?= htmlspecialchars($a['name']) ?></td>
                     <td>
                         <div><?= htmlspecialchars($a['phone']) ?></div>
-                        <div style="font-size: 12px; color: var(--text-muted);"><?= htmlspecialchars($a['email']) ?></div>
+                        <div style="font-size: 12px; color: var(--text-muted);"><?= htmlspecialchars($a['email'] ?? '—') ?></div>
                     </td>
-                    <td><?= htmlspecialchars($a['doctor']) ?></td>
+                    <td><?= htmlspecialchars($a['doctor_name'] ?? 'Не выбран') ?></td>
                     <td style="color: var(--text-muted); font-size: 13px; max-width: 280px;"><?= htmlspecialchars($a['symptoms']) ?></td>
                     <td data-col="status" data-value="<?= htmlspecialchars($a['status']) ?>">
                         <span class="badge <?= $cls ?>"><span class="dot"></span><?= status_label($a['status']) ?></span>
                     </td>
                     <td>
                         <div class="row-actions">
-                            <button class="icon-btn" title="Принять в работу">
+                            <button class="icon-btn" title="Принять в работу" onclick="changeStatus(<?= $a['id'] ?>, 'approved')">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </button>
-                            <button class="icon-btn" title="Позвонить">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                            </button>
-                            <button class="icon-btn danger" title="Отклонить" data-confirm="Отклонить заявку?">
+                            <button class="icon-btn" title="Отклонить" onclick="changeStatus(<?= $a['id'] ?>, 'rejected')">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             </button>
                         </div>
@@ -80,5 +115,26 @@ include __DIR__ . '/includes/admin-header.php';
         </table>
     </div>
 </div>
+
+<script>
+function changeStatus(id, status) {
+    if (confirm('Изменить статус заявки?')) {
+        fetch('/Web/Clinic/api.php?action=update_application_status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, status: status })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(err => alert('Ошибка: ' + err.message));
+    }
+}
+</script>
 
 <?php include __DIR__ . '/includes/admin-footer.php'; ?>
