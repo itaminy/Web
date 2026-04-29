@@ -1,5 +1,28 @@
 <?php
-require __DIR__ . '/includes/sample-data.php';
+session_start();
+
+// Подключение к БД
+$config_file = '/home/u82382/www/Web/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации БД');
+}
+require_once $config_file;
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (PDOException $e) {
+    die('Ошибка подключения к БД');
+}
+
+// Получаем пациентов из БД
+$stmt = $pdo->query("SELECT * FROM patients ORDER BY id DESC");
+$PATIENTS = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 $page_title = 'Пациенты';
 include __DIR__ . '/includes/admin-header.php';
 ?>
