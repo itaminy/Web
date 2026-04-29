@@ -1,5 +1,48 @@
 <?php
-require __DIR__ . '/includes/sample-data.php';
+session_start();
+
+// Подключение к БД
+$config_file = '/home/u82382/www/Web/db_config.php';
+if (!file_exists($config_file)) {
+    die('Ошибка конфигурации БД');
+}
+require_once $config_file;
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+} catch (PDOException $e) {
+    die('Ошибка подключения к БД');
+}
+
+// Получаем приёмы из БД с именами пациентов, врачей и болезней
+$stmt = $pdo->query("
+    SELECT 
+        v.*,
+        p.name as patient_name,
+        d.name as doctor_name,
+        dis.name as disease_name
+    FROM visits v
+    LEFT JOIN patients p ON v.patient_id = p.id
+    LEFT JOIN doctors d ON v.doctor_id = d.id
+    LEFT JOIN diseases dis ON v.disease_id = dis.id
+    ORDER BY v.visit_date DESC
+");
+$VISITS = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function status_label($s) {
+    return match($s) {
+        'scheduled' => 'Запланирован',
+        'completed' => 'Завершён',
+        'cancelled' => 'Отменён',
+        default => $s
+    };
+}
+
 $page_title = 'Журнал приёмов';
 include __DIR__ . '/includes/admin-header.php';
 ?>
@@ -23,8 +66,8 @@ include __DIR__ . '/includes/admin-header.php';
         </div>
         <select data-filter-target="#visits-table" data-filter-column="status">
             <option value="">Все статусы</option>
-            <option value="completed">Завершён</option>
             <option value="scheduled">Запланирован</option>
+            <option value="completed">Завершён</option>
             <option value="cancelled">Отменён</option>
         </select>
     </div>
@@ -44,17 +87,21 @@ include __DIR__ . '/includes/admin-header.php';
             </thead>
             <tbody>
                 <?php foreach ($VISITS as $v):
-                    $cls = $v['status'] === 'completed' ? 'badge-success' : ($v['status'] === 'cancelled' ? 'badge-danger' : 'badge-info');
+                    $cls = match($v['status']) {
+                        'completed' => 'badge-success',
+                        'cancelled' => 'badge-danger',
+                        default => 'badge-info'
+                    };
                 ?>
                 <tr>
                     <td class="num-col"><?= (int)$v['id'] ?></td>
                     <td>
-                        <div style="font-weight: 600;"><?= date('d.m.Y', strtotime($v['date'])) ?></div>
-                        <div style="font-size: 12px; color: var(--text-muted);"><?= date('H:i', strtotime($v['date'])) ?></div>
+                        <div style="font-weight: 600;"><?= date('d.m.Y', strtotime($v['visit_date'])) ?></div>
+                        <div style="font-size: 12px; color: var(--text-muted);"><?= date('H:i', strtotime($v['visit_date'])) ?></div>
                     </td>
-                    <td><?= htmlspecialchars($v['patient']) ?></td>
-                    <td><?= htmlspecialchars($v['doctor']) ?></td>
-                    <td><span class="badge badge-primary"><?= htmlspecialchars($v['disease']) ?></span></td>
+                    <td><?= htmlspecialchars($v['patient_name'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($v['doctor_name'] ?? '—') ?></td>
+                    <td><span class="badge badge-primary"><?= htmlspecialchars($v['disease_name'] ?? '—') ?></span></td>
                     <td data-col="status" data-value="<?= htmlspecialchars($v['status']) ?>">
                         <span class="badge <?= $cls ?>"><span class="dot"></span><?= status_label($v['status']) ?></span>
                     </td>
