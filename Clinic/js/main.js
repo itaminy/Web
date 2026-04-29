@@ -246,4 +246,46 @@ if (applyForm && successCard) {
         });
     });
 
+
+// ========== ТЕСТОВЫЙ ОБРАБОТЧИК С ЛОГИРОВАНИЕМ ==========
+const testForm = document.getElementById('applyForm');
+if (testForm) {
+    console.log('✅ Форма applyForm найдена');
+    testForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('✅ Событие submit сработало');
+        
+        const formData = new FormData(testForm);
+        const data = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            email: formData.get('email'),
+            date: formData.get('date'),
+            doctor_id: formData.get('doctor'),
+            symptoms: formData.get('symptoms')
+        };
+        console.log('📤 Отправляем данные:', data);
+        
+        try {
+            const response = await fetch('/Web/Clinic/api.php?action=application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            console.log('📥 Ответ сервера:', result);
+            
+            if (result.success) {
+                alert('Заявка отправлена!');
+            } else {
+                alert('Ошибка: ' + JSON.stringify(result.errors));
+            }
+        } catch (err) {
+            console.error('❌ Ошибка:', err);
+            alert('Ошибка соединения');
+        }
+    });
+} else {
+    console.log('❌ Форма applyForm НЕ найдена');
+}
 })();
